@@ -1,22 +1,36 @@
 
-optim.estimator <- function(formula, data, func.lf, func.ini,gr=NULL,silent=TRUE, ...){
-  ini <- func.ini(formula, data)
-  return(optim.estimator.withIni(formula, data, func.lf, ini,gr,...,silent))
+optim.estimator <- function(formula, data, func.lf, func.ini,env,gr=NULL,silent=TRUE){
+  ini = NULL
+  if (exists("ini_value", envir =env)){
+    ini = get("ini_value", envir =env)
+  }else{
+    ini <- func.ini(formula, data, env=env)  
+  } 
+  return(optim.estimator.withIni(formula, data, func.lf, ini,env=env,gr=gr,silent=silent))
 }
 
-optim.estimator.withIni <- function(formula, data, func.lf, ini,gr=NULL,silent=TRUE, ...){
+optim.estimator.withIni <- function(formula, data, func.lf, ini,env=env,gr=NULL,silent=TRUE){
   result <- NULL
   mf <- model.frame(formula, data)
   
   
   y <- as.matrix(model.response(mf))
   X <- as.matrix(mf[-1])
- 
   tm <- attr(mf, "terms")
   intercept <- attr(tm, "intercept") == 1
   if (intercept)  X <- cbind(1L,X)
+  assign("X", X, envir=env)
+  assign("y", y, envir=env)
   tryCatch({
-    p<-optim(ini,func.lf,method="BFGS",hessian=T, y, X, gr=gr, control=list(maxit=10000,reltol=1e-12))
+    if (!silent){
+      print("----------------------------------------")
+      print("INI: ")
+      print(ini)
+    }
+    if (is.null(ini)){
+      stop("Ini is not defined")
+    }
+    p<-optim(par=ini,fn=func.lf,env=env,gr=gr,method="BFGS", control=list(maxit=10000,reltol=1e-16),hessian=T)
     if (!silent){
       print("Estimates: ")
       print(p$par)

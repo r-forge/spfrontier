@@ -1,4 +1,7 @@
-sfa.hnormal.lf <- function(parameters,y,X,maxValue=1E10){
+sfa.hnormal.lf <- function(parameters,env){
+  y = get("y", envir =env)
+  X = get("X", envir =env)
+  maxValue= get("max_ll_value", envir =env)
   gamma <- parameters[1:(length(parameters)-2)]
   nu <- parameters[length(parameters)-1]
   lambda <- parameters[(length(parameters))]
@@ -14,7 +17,9 @@ sfa.hnormal.lf <- function(parameters,y,X,maxValue=1E10){
   return(ret)
 }
 
-sfa.hnormal.lf.gradient<-function(parameters,y,X){
+sfa.hnormal.lf.gradient<-function(parameters,env){
+  y = get("y", envir =env)
+  X = get("X", envir =env)
   gamma <- parameters[1:(length(parameters)-2)]
   nu <- parameters[length(parameters)-1]
   lambda <- parameters[(length(parameters))]
@@ -29,7 +34,7 @@ sfa.hnormal.lf.gradient<-function(parameters,y,X){
   return(c(-dLdGamma,-dLdNu,-dLdLambda))
 }
 
-sfa.hnormal.ini<-function(formula, data){
+sfa.hnormal.ini<-function(formula, data, env=new.env()){
   ols <- lm(formula, data=data)
   res_ols <- resid(ols)
   sigmaU <- var(res_ols)*(1-2/pi)
@@ -48,7 +53,7 @@ sfa.hnormal.ini<-function(formula, data){
 sfa.hnormal.estimator <- function(formula, data,silent=TRUE){
   env <- new.env()
   assign("max_ll_value", 1E10, envir=env)
-  estimates <- optim.estimator(formula, data, sfa.hnormal.lf, sfa.hnormal.ini, sfa.hnormal.lf.gradient, silent,envir=env)
+  estimates <- optim.estimator(formula, data, sfa.hnormal.lf, sfa.hnormal.ini,env=env, gr=sfa.hnormal.lf.gradient, silent=silent)
   est <-as.vector(estimates$estimate)
   k <- length(est)
   gamma <- as.vector(est[1:(k-2)])
