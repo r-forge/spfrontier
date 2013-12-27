@@ -56,7 +56,8 @@ ezsim_sararsfa110<-ezsim(
   parameter_def = parameters,
   dgp           = sararsfa110.dgp,
   estimator     = sararsfa110.hnormal.estimator.wrapper,
-  true_value    = true.value
+  true_value    = true.value,
+  auto_save = 100
 )
 
 runs = length(ezsim_sararsfa110$simulation_result[[1]])

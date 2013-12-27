@@ -1,4 +1,12 @@
 sararsfa110.hnormal.lf <- function(parameters,env){
+  num = 0
+  if (exists("sararsfa110.hnormal.lf_number", envir =env)){
+    num = get("sararsfa110.hnormal.lf_number", envir =env)
+  }
+  num = num +1 
+  assign("sararsfa110.hnormal.lf_number", num, envir=env)
+  print(paste("Lf number ",num))
+  
   y = get("y", envir =env)
   X = get("X", envir =env)
   W = get("W", envir =env)
@@ -15,6 +23,12 @@ sararsfa110.hnormal.lf <- function(parameters,env){
   rho <- parameters[k-1]
   rho2 <- parameters[k]
   
+  
+  if (sigmaV<=0) return (maxValue)
+  if (sigmaU<=0) return (maxValue)
+  if (abs(rho)>1) return (maxValue)
+  if (abs(rho2)>1) return (maxValue)
+  
   e <- y  - rho * W %*% y -  X %*% beta
   I <- diag(n)
   
@@ -24,12 +38,12 @@ sararsfa110.hnormal.lf <- function(parameters,env){
   mCapitalTheta <- sigmaU^2*I+sigmaV^2*mCapitalSigma
   mCapitalOmega <-sigmaU^2*sigmaV^2*mCapitalSigma %*% solve(mCapitalTheta)
   mMu <- -sigmaV^(-2)*mCapitalOmega%*%solve(mCapitalSigma)%*%e
-  logl<- - (log(det(I-rho*W))+log(pmvnorm(lower=rep(0, n),mean=as.vector(t(mMu)), sigma=mCapitalOmega))+log(dmvnorm(x=as.vector(e),mean=rep(0, n), sigma=mCapitalTheta)))
+  logl<- - (log(det(I-rho*W))+log(ptmvnorm(lowerx=rep(0, n),upperx = rep( Inf, n),mean=as.vector(t(mMu)), sigma=mCapitalOmega))+log(dmvnorm(x=as.vector(e),mean=rep(0, n), sigma=mCapitalTheta)))
   
   if (is.nan(logl) || logl>maxValue) {
     logl <-maxValue
   }
-  names(logl) <- "Log-Lik SFA normal/half-normal"
+  names(logl) <- "Log-Lik sararsfa110 normal/half-normal"
   return(logl)
 }
 
