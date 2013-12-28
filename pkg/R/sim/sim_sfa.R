@@ -1,4 +1,4 @@
-parameters <- createParDef(list(n=c(100, 500),sigmaX=c(10,100), beta0=1,beta1=-2,beta2=3, sigmaV=3, sigmaU=5))
+parameters <- createParDef(list(n=c(100),sigmaX=10, beta0=1,beta1=-2,beta2=3, sigmaV=3, sigmaU=5))
 
 sfa.dgp <- function(){
   formula <- as.formula("y ~ X1 + X2")
@@ -16,7 +16,7 @@ sfa.dgp <- function(){
 }
 
 sfa.hnormal.estimator.wrapper <- function(d){
-  est <- sfa.hnormal.estimator(d$formula,d$data,silent=TRUE)
+  est <- sfa.hnormal.estimator(d$formula,d$data,logging = "debug")
   out <- c(est$beta,est$sigmaV, est$sigmaU)
   names(out) <- c("beta0_hat","beta1_hat","beta2_hat","sigmaV_hat","sigmaU_hat")
   return(out)
@@ -29,8 +29,9 @@ true.value <- function(){
 
 
 
+set.seed(0)
 ezsim_sfa<-ezsim(
-  m             = 100,
+  m             = 1,
   run           = TRUE,
   display_name  = c(beta0_hat="hat(beta)[0]",beta1_hat="hat(beta)[1]",beta2_hat="hat(beta)[2]",sigmaV_hat="hat(sigma)[v]",sigmaU_hat="hat(sigma)[u]"),
   parameter_def = parameters,

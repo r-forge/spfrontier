@@ -1,3 +1,12 @@
+sarsfa.params = function(parameters){
+  k = length(parameters)
+  p = sfa.params(head(parameters,-1))
+  p$Rho = parameters[k]
+  p$Rho = rho
+  return(p)
+}
+
+
 sarsfa.hnormal.lf <- function(parameters,env){
   y = get("y", envir =env)
   X = get("X", envir =env)
@@ -22,7 +31,6 @@ sarsfa.hnormal.lf <- function(parameters,env){
   if (is.nan(ret) || ret>maxValue) {
     ret <-maxValue
   }
-  names(ret) <- "Log-Lik SFA normal/half-normal"
   return(ret)
 }
 
@@ -53,27 +61,34 @@ sarsfa.hnormal.lf.gradient<-function(parameters,env){
 }
 
 sarsfa.hnormal.ini<-function(formula, data, env=new.env()){
+  logger.debug("Calculating initial values")
   
-  W = get("W", envir =env)
+  W = spfrontier.env.get("W")
   mf <- model.frame(formula, data)
-    
   y <- as.matrix(model.response(mf))
   Wy = W %*% y
   data$Wy = Wy
-  
   formula = update(formula,  ~ . + Wy)
   
   sfa <- sfa.hnormal.estimator(formula, data)
   
   
-  sigma <- sfa$sigma
-  rm("est_success", envir=env)
-  if (length(sigma)==0) {
+  sigmaV <- sfa$sigmaV
+  if (length(sigmaV)==0) {
     print("SFA is failed")
     assign("est_success", FALSE, envir=env)
     return(NULL)
   }
   
+  
+  beta <- sfa$beta
+  rho = tail(beta, n=1)
+  sfa$beta = head(beta, -1)
+  
+  p = ord.reparam(sfa)
+  result = c(p$gamma,p$nu,p$lambda,p$rho)
+  logger.info("Initial values:", result)
+  return(result)
   
   lambda <- sfa$lambda
   nu <- 1/sigma
@@ -88,31 +103,20 @@ sarsfa.hnormal.ini<-function(formula, data, env=new.env()){
   return(result)
 }
 
-sarsfa.hnormal.estimator <- function(formula, data,W,silent=TRUE,env=new.env()){
-  assign("max_ll_value", 1E10, envir=env)
-  assign("W", W, envir=env)
-  num = 0
-  if (exists("seq_number", envir =env)){
-    num = get("seq_number", envir =env)
-  }
-  #num = num +1 
-  #assign("seq_number", num, envir=env)
-  #print(paste("Run number ",num))
-  estimates <- optim.estimator(formula, data, sarsfa.hnormal.lf, sarsfa.hnormal.ini, gr=sarsfa.hnormal.lf.gradient, silent=silent,env=env)
-  if(!is.null(estimates)){
-    est <-as.vector(estimates$estimate)
-  k <- length(est)
-  gamma <- as.vector(est[1:(k-3)])
-  nu <- as.numeric(est[k-2])
-  lambda <-  as.numeric(est[k-1])
-  rho <-  as.numeric(est[k])
-  sigma <- 1/nu
-  beta <- gamma*sigma
-  sigmaV <-sigma/sqrt(1+lambda^2)
-  sigmaU <- lambda*sigmaV
-  res <- list(beta=beta,sigma=sigma,lambda=lambda,rho=rho,sigmaV=sigmaV, sigmaU=sigmaU)
+sarsfa.hnormal.estimator <- function(formula, data,logging = "quiet", ini.values = NULL){
+  assign("logging.level",logging, envir = spfrontier.env)
+  print(">>>>>>>>>>>>>>>>")
+  logger.debug("Estimator started")
+  sfa.prepare(formula, data)
+  if (is.null(ini.values)){
+    ini.values = sarsfa.hnormal.ini(formula, data)  
+  } 
+  
+  assign("W", W, envir=spfrontier.env)
+  
+  estimates = optim.estimator(formula, data, sarsfa.hnormal.lf, ini.values, gr=sarsfa.hnormal.lf.gradient)
+  res = ord.reparamBack(sarsfa.params(as.vector(estimates$estimate)))
+  logger.info("Estimates:",c(res$beta,res$sigmaV,res$sigmaU,res$rho))  
+  print("")
   return(res)
-  } else{
-    return(list())
-  }
 }

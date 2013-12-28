@@ -43,9 +43,12 @@ sararsfa111.tnormal.lf <- function(parameters,env){
   mOmega = sigmaU^2*t(Sp3)%*%Sp3
   mC = mSigma + mOmega
   mB = mOmega%*%solve(mC)%*%mSigma
+  #mB = mOmega%*%chol2inv(chol(mC))%*%mSigma
+  
   mA = mB %*% solve(mSigma)
   mD = -mB %*% solve(mOmega)
   vMu = rep(mu, n)
+  
   logl <- maxValue
   tryCatch({
   logl<- - (log(det(I-rho*W))-log(ptmvnorm(lowerx=rep(-Inf, n),upperx = rep(0, n),mean=as.vector(t(vMu)), sigma=mOmega))
