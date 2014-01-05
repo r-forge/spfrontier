@@ -1,9 +1,8 @@
-sfa.params = function(parameters){
+frontierHN.params = function(parameters){
   k = length(parameters)
   gamma = parameters[1:(k-2)]
   nu = parameters[k-1]
   lambda = parameters[k]
-  
   names(gamma) = paste("Gamma", seq(k-2), sep = "")
   names(nu) = "Nu"
   names(lambda) = "Lambda"
@@ -44,30 +43,30 @@ ord.reparam = function(params){
   return(c(list(gamma=gamma,nu=nu,lambda=lambda),params))
 }
 
-sfa.hnormal.lf <- function(parameters,env){
-  y = spfrontier.env.get("y")
-  X = spfrontier.env.get("X")
-  p = sfa.params(parameters)
-  counter = spfrontier.env.counter("sfa.hnormal.lf")
-  logger.debug(paste("Evaluating 'sfa.hnormal.lf' for parameters","[run=",counter,"]:"),parameters)
+frontierHN.logL <- function(parameters,env){
+  counter = envir.counter("frontierHN.logL")
+  logger.debug(paste("Evaluating 'frontierHN.logL' for parameters","[run=",counter,"]:"),parameters)
+  y = envir.get("y")
+  X = envir.get("X")
+  p = frontierHN.params(parameters)
   omega <- p$nu * y - X %*% p$gamma
   N <- length(y)  
-  ret = Inf
+  ret = -10e8
   if ((p$lambda>0) && (p$nu>0)){
     ret = N * log(p$nu) - 0.5 * t(omega)%*%omega + sum(log(pnorm(-omega*p$lambda)))
   }else{
-    logger.debug("'sfa.hnormal.lf' value:",ret)
+    logger.debug("Parameters are out of space")
   }
-  if (is.nan(ret)) ret <- Inf
-  logger.debug(paste("'sfa.hnormal.lf' value:",ret))
+  if (is.nan(ret) || (ret==-Inf)) ret = -10e8
+  logger.debug(paste("frontierHN.logL = ",-ret,sep=""))
   return(-ret)
 }
 
-sfa.hnormal.lf.gradient<-function(parameters,env){
-  y = spfrontier.env.get("y")
-  X = spfrontier.env.get("X")
-  p = sfa.params(parameters)
-  logger.debug("Evaluating 'sfa.hnormal.lf.gradient' for parameters:",parameters)
+frontierHN.logL.gradient<-function(parameters,env){
+  logger.debug("Evaluating 'frontierHN.logL.gradient' for parameters:",parameters)
+  y = envir.get("y")
+  X = envir.get("X")
+  p = frontierHN.params(parameters)
   omega = p$nu * y - X %*% p$gamma
   a = -omega * p$lambda
   delta = dnorm(a)/pnorm(a)
@@ -78,16 +77,24 @@ sfa.hnormal.lf.gradient<-function(parameters,env){
   dLdLambda = -t(delta)%*%omega
   res = c(-dLdGamma,-dLdNu,-dLdLambda)
   names(res) = c(paste("dGamma", seq(length(dLdGamma)), sep = ""), "dNu", "dLambda")
-  logger.debug("'sfa.hnormal.lf.gradient' value:",res)
   return(res)
 }
 
-sfa.hnormal.ini<-function(formula, data){
-  logger.debug("Calculating initial values")
+frontierHN.ini<-function(formula, data){
+  logger.debug("frontierHN: calculating initial values")
   ols <- lm(formula, data=data)
   res_ols <- resid(ols)
-  sigmaU <- var(res_ols)*(1-2/pi)
-  sigmaV <- var(res_ols)
+  m2 = sum(res_ols^2)/length(res_ols)
+  m3 = sum(res_ols^3)/length(res_ols)
+  sigmaU = (m3*sqrt(pi/2)/(1-4/pi))^(1/3)
+  sigmaV = 0
+  if (!is.nan(sigmaU) && (m2 - (1-2/pi)*sigmaU^2>0)){
+    sigmaV = sqrt(m2 - (1-2/pi)*sigmaU^2)
+  }
+  if ((sigmaU<=0) || (sigmaV<=0)){
+    sigmaU <- var(res_ols)*(1-2/pi)
+    sigmaV <- var(res_ols)
+  }
   beta <- as.vector(coef(ols))
   
   par = list(beta = beta,sigmaV=sigmaV,sigmaU=sigmaU)
@@ -97,32 +104,33 @@ sfa.hnormal.ini<-function(formula, data){
   return(result)
 }
 
-sfa.prepare = function(formula, data){
+prepareXY <- function(formula, data){
   mf <- model.frame(formula, data)
   y <- as.matrix(model.response(mf))
   X <- as.matrix(mf[-1])
   tm <- attr(mf, "terms")
   intercept <- attr(tm, "intercept") == 1
   if (intercept)  X <- cbind(1L,X)
-  assign("X", X, envir = spfrontier.env)
-  assign("y", y, envir = spfrontier.env)
+  envir.assign("X", X)
+  envir.assign("y", y)
 }
 
-sfa.hnormal.estimator <- function(formula, data, logging = "quiet", ini.values = NULL){
-  spfrontier.env.clear()
-  assign("logging.level",logging, envir = spfrontier.env)
-  print(">>>>>>>>>>>>>>>>")
-  logger.debug("Estimator started")
-  
-  sfa.prepare(formula, data)
-
-  if (is.null(ini.values)){
-    ini.values = sfa.hnormal.ini(formula, data)  
-  } 
-  print(ini.values)
-  estimates = optim.estimator(formula, data, sfa.hnormal.lf, ini = ini.values, gr=sfa.hnormal.lf.gradient)
-  res = ord.reparamBack(sfa.params(as.vector(estimates$estimate)))
-  logger.info("Estimates:",c(res$beta,res$sigmaV,res$sigmaU))  
-  print("")
-  return(res)
+frontierHN.prepare = function(formula, data,...){
+  prepareXY(formula, data)
 }
+
+frontierHN.handle.estimates <- function(estimates){
+  logger.debug("frontierHN: Handling estimates")
+  ret <- new("ModelEstimates", coefficients = ord.reparamBack(frontierHN.params(as.vector(estimates$estimate))))
+  return(ret)
+}
+
+registerEstimator("frontierHN",
+                  new("Estimator", 
+                      id = "mle", 
+                      initialize = frontierHN.prepare, 
+                      ini.values = frontierHN.ini, 
+                      logL = frontierHN.logL, 
+                      gradient = frontierHN.logL.gradient, 
+                      handle.estimates = frontierHN.handle.estimates
+                      ))

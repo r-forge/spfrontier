@@ -26,7 +26,3 @@ row.stdrt = function(W){
   }
   return(W)
 }
-
-W = row.stdrt(genW(100, type="queen"))
-log(det(I - rho * W))
-sum(log(1-rho*eigen(W,only.values=TRUE)$values))
