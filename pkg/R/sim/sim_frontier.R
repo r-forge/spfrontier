@@ -38,7 +38,7 @@ frontierHN.test <- function(){
     true_value    = frontierHN.true.value
   )
   
-  summary(ezsim_frontierHN)
+  print(summary(ezsim_frontierHN))
   #plot(ezsim_frontierHN)
   #plot(ezsim_frontierHN,'density')
 }

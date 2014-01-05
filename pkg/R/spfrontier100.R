@@ -1,40 +1,40 @@
-sarsfa.params = function(parameters){
+spfrontier100HN.params = function(parameters){
   k = length(parameters)
-  p = sfa.params(head(parameters,-1))
+  p = frontierHN.params(head(parameters,-1))
   p$rho = parameters[k]
   return(p)
 }
 
 
-sarsfa.hnormal.lf <- function(parameters){
+spfrontier100HN.logL <- function(parameters){
+  counter = envir.counter("spfrontier100HN.logL")
+  logger.debug(paste("Evaluating 'spfrontier100HN.logL' for parameters","[run=",counter,"]:"),parameters)
   y = envir.get("y")
   X = envir.get("X")
   W = envir.get("W")
-  p = sarsfa.params(parameters)
-  counter = envir.counter("sarsfa.hnormal.lf")
-  logger.debug(paste("Evaluating 'sarsfa.hnormal.lf' for parameters","[run=",counter,"]:"),parameters)
+  p = spfrontier100HN.params(parameters)
   
   omega <- p$nu * (y-p$rho*W%*%y) - X%*%p$gamma
   N <- length(y)
-  SpDet <- log(det(diag(N)-p$rho*W))
+  SpDet <- det(diag(N)-p$rho*W)
   ret = -10e8
-  if ((p$lambda>0)&&(p$nu>0)&&(abs(p$rho)<1)){
-    ret = SpDet + N * log(p$nu) - 0.5 * t(omega)%*%omega + sum(log(pnorm(-omega*p$lambda)))
+  if ((p$lambda>0)&&(p$nu>0)&&(abs(p$rho)<1)&&(SpDet > 0)){
+    ret = log(SpDet) + N * log(p$nu) - 0.5 * t(omega)%*%omega + sum(log(pnorm(-omega*p$lambda)))
   }else{
     logger.debug("Parameters are out of space")
   }
   if (is.nan(ret) || (ret==-Inf)) ret = -10e8
-  logger.debug(paste("'sarsfa.hnormal.lf' value:",-ret))
+  logger.debug(paste("spfrontier100HN.logL =",-ret))
   return(-ret)
 }
 
-sarsfa.hnormal.lf.gradient<-function(parameters){
+spfrontier100HN.logL.gradient<-function(parameters){
+  logger.debug("Evaluating 'spfrontier100HN.logL.gradient' for parameters:",parameters)
   y = envir.get("y")
   X = envir.get("X")
   W = envir.get("W")
   
-  p = sarsfa.params(parameters)
-  logger.debug("Evaluating 'sarsfa.hnormal.lf.gradient' for parameters:",parameters)
+  p = spfrontier100HN.params(parameters)
   
   
   omega <- p$nu * (y-p$rho*W%*%y) - X%*%p$gamma
@@ -50,14 +50,13 @@ sarsfa.hnormal.lf.gradient<-function(parameters){
   #dLdRho = abs(rho-0.2)
   grad = c(-dLdGamma,-dLdNu,-dLdLambda,-dLdRho)
   names(grad) = c(paste("dGamma", seq(length(dLdGamma)), sep = ""), "dNu", "dLambda", "dRho")
-  logger.debug("'sarsfa.hnormal.lf.gradient' value:",grad)
   return(grad)
 }
 
-sarsfa.hnormal.ini<-function(formula, data){
-  logger.debug("Calculating initial values")
+spfrontier100HN.ini <- function(formula, data){
+  logger.debug("spfrontier100HN: calculating initial values")
   W = envir.get("W")
-  noSpatLag = all(mat.or.vec(10,10) == 0)
+  noSpatLag = FALSE
   if (!noSpatLag){
     mf <- model.frame(formula, data)
     y <- as.matrix(model.response(mf))
@@ -65,27 +64,62 @@ sarsfa.hnormal.ini<-function(formula, data){
     data$Wy = Wy
     formula = update(formula,  ~ . + Wy)
   }
-  sfa <- sfa.hnormal.estimator(formula, data)
-  
-  if (length(sfa$beta)==0) {
+  sfa <- spfrontier(formula, data, model="frontierHN")
+  coefs <- sfa@coefficients
+  if (length(coefs$beta)==0) {
     print("SFA is failed")
     envir.assign("est.failed", TRUE)
     return(NULL)
   }
   
-  beta <- sfa$beta
+  beta <- coefs$beta
   if (!noSpatLag){
-    sfa$rho = tail(beta, n=1)
-    names(sfa$rho) = "Rho"
-    sfa$beta = head(beta, -1)
+    coefs$rho = tail(beta, n=1)
+    names(coefs$rho) = "Rho"
+    coefs$beta = head(beta, -1)
   }else{
-    sfa$rho = 0
+    coefs$rho = 0
   }
-  p = ord.reparam(sfa)
+  p = ord.reparam(coefs)
   result = c(p$gamma,p$nu,p$lambda,p$rho)
   logger.info("Initial values:", result)
   return(result)
 }
+
+spfrontier100HN.prepare = function(formula, data,W,...){
+  prepareXY(formula, data)
+  envir.assign("W", W)
+}
+
+spfrontier100HN.handle.estimates <- function(estimates){
+  logger.debug("spfrontier100HN: Handling estimates")
+  coefs <- list()
+  logL <- 0
+  if (!is.null(estimates$estimate)){
+    status <- 0
+    coefs <- ord.reparamBack(spfrontier100HN.params(as.vector(estimates$estimate)))
+    logL <- estimates$value
+  }else{
+    status <- 1
+  }
+  
+  ret <- new("ModelEstimates", 
+             coefficients = coefs,
+             status = status,
+             logL = logL
+  )
+  return(ret)
+}
+
+registerEstimator("spfrontier100HN",
+                  new("Estimator", 
+                      id = "mle", 
+                      initialize = spfrontier100HN.prepare, 
+                      ini.values = spfrontier100HN.ini, 
+                      logL = spfrontier100HN.logL, 
+                      gradient = spfrontier100HN.logL.gradient, 
+                      handle.estimates = spfrontier100HN.handle.estimates
+                  ))
 
 sarsfa.hnormal.estimator <- function(formula, data,W,logging = "quiet", ini.values = NULL,control=NULL){
   envir.init()

@@ -20,13 +20,13 @@ setGenericVerif <- function(x,y){if(!isGeneric(x)){setGeneric(x,y)}else{}}
 setGenericVerif("getId",function(object){standardGeneric ("getId")})
 setMethod("getId","Model", function(object){return(object@id)})
 
-setGenericVerif("estimators",function(object){standardGeneric ("estimators")})
-setGenericVerif("estimators<-",function(object,value){standardGeneric("estimators<-")})
+setGenericVerif("estimators",function(model){standardGeneric ("estimators")})
+setGenericVerif("estimators<-",function(model,value){standardGeneric("estimators<-")})
 
-setMethod("estimators","Model", function(object){return(object@estimators)})
-setReplaceMethod("estimators","Model", function(object, value){
-  object@estimators <- value;
-  return(object)
+setMethod("estimators","Model", function(model){return(model@estimators)})
+setReplaceMethod("estimators","Model", function(model, value){
+  model@estimators <- value;
+  return(model)
 })
 
 
@@ -41,18 +41,19 @@ setMethod("show", "Estimator",
       cat("Estimator[ID=",object@id,"]\n", sep="")
     }
 )
-setGenericVerif("run",function(object, formula, data,ini.values,...){standardGeneric("run")})
-setMethod("run","Estimator", function(object, formula, data,ini.values, ...){
+setMethod("getId","Estimator", function(object){return(object@id)})
+
+setGenericVerif("run",function(estimator, formula, data,ini.values,...){standardGeneric("run")})
+setMethod("run","Estimator", function(estimator, formula, data,ini.values, ...){
   envir.init(...)
   logger.start()
   logger.debug("Estimator started")
-  print(object@initialize)
-  object@initialize(formula, data,...)
+  estimator@initialize(formula, data,...)
   if (is.null(ini.values)){
-    ini.values <- object@ini.values(formula, data)  
+    ini.values <- estimator@ini.values(formula, data)  
   } 
-  estimates <- optim.estimator(formula, data, object@logL, ini = ini.values, gr=object@gradient)
-  ret <- object@handle.estimates(estimates)
+  estimates <- optim.estimator(formula, data, estimator@logL, ini = ini.values, gr=estimator@gradient)
+  ret <- estimator@handle.estimates(estimates)
   envir.finalise()
   return(ret)
 })
@@ -62,6 +63,7 @@ setMethod("run","Estimator", function(object, formula, data,ini.values, ...){
 setClass("ModelEstimates", representation(
                                      coefficients = "list", 
                                      status = "numeric", 
+                                     logL = "numeric", 
                                      hessian = "matrix", 
                                      residuals = "list", 
                                      fit = "list"))
@@ -76,21 +78,23 @@ setMethod("coef", "ModelEstimates",
             return(unlist(object@coefficients))
           }
 )
+setGenericVerif("status",function(object){standardGeneric ("status")})
+setMethod("status","ModelEstimates", function(object){return(object@status)})
 
 registerModel = function(model){
   .Models[[getId(model)]] <<- model
 }
 
-#Fix @
+
 registerEstimator = function(modelId, estimator){
   model <- .Models[[modelId]]
   if (is.null(model)){
     stop(cat("No model is registered for ID=", modelId))
   }
   est <- estimators(model)
-  if (!is.null(est[[estimator@id]]))
-    warning(paste("Estimator",estimator@id," is already registered for the model",modelId," - replacing"))
-  est[[estimator@id]] <- estimator
+  if (!is.null(est[[getId(estimator)]]))
+    warning(paste("Estimator",getId(estimator)," is already registered for the model",modelId," - replacing"))
+  est[[getId(estimator)]] <- estimator
   estimators(model) <- est
   registerModel(model)
 }

@@ -121,7 +121,21 @@ frontierHN.prepare = function(formula, data,...){
 
 frontierHN.handle.estimates <- function(estimates){
   logger.debug("frontierHN: Handling estimates")
-  ret <- new("ModelEstimates", coefficients = ord.reparamBack(frontierHN.params(as.vector(estimates$estimate))))
+  coefs <- list()
+  logL <- 0
+  if (!is.null(estimates$estimate)){
+    status <- 0
+    coefs <- ord.reparamBack(frontierHN.params(as.vector(estimates$estimate)))
+    logL <- estimates$value
+  }else{
+    status <- 1
+  }
+  
+  ret <- new("ModelEstimates", 
+             coefficients = coefs,
+             status = status,
+             logL = logL
+             )
   return(ret)
 }
 
