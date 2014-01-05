@@ -56,7 +56,7 @@ spfrontier100HN.logL.gradient<-function(parameters){
 spfrontier100HN.ini <- function(formula, data){
   logger.debug("spfrontier100HN: calculating initial values")
   W = envir.get("W")
-  noSpatLag = FALSE
+  noSpatLag = is.null(W)
   if (!noSpatLag){
     mf <- model.frame(formula, data)
     y <- as.matrix(model.response(mf))
@@ -99,6 +99,7 @@ spfrontier100HN.handle.estimates <- function(estimates){
     status <- 0
     coefs <- ord.reparamBack(spfrontier100HN.params(as.vector(estimates$estimate)))
     logL <- estimates$value
+    logger.info("Estimates:",unlist(coefs))
   }else{
     status <- 1
   }
@@ -120,29 +121,3 @@ registerEstimator("spfrontier100HN",
                       gradient = spfrontier100HN.logL.gradient, 
                       handle.estimates = spfrontier100HN.handle.estimates
                   ))
-
-sarsfa.hnormal.estimator <- function(formula, data,W,logging = "quiet", ini.values = NULL,control=NULL){
-  envir.init()
-  envir.assign("logging.level",logging)
-  if (!is.null(control)) envir.assign("control",control)
-  logger.start()
-  logger.debug("Estimator started")
-  
-  sfa.prepare(formula, data)
-  envir.assign("W", W)
-  
-  if (is.null(ini.values)){
-    ini.values = sarsfa.hnormal.ini(formula, data)  
-  } 
-  
-  estimates = optim.estimator(formula, data, sarsfa.hnormal.lf, ini.values, gr=sarsfa.hnormal.lf.gradient)
-  est_failed = !is.null(envir.get("est.failed"))
-  res = ord.reparamBack(sarsfa.params(estimates$estimate))
-  if(est_failed){
-    res$failed = T
-  }
-  logger.info("Estimates:",c(res$beta,res$sigmaV,res$sigmaU,res$rho))  
-  print("")
-  envir.finalise()
-  return(res)
-}

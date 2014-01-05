@@ -29,12 +29,12 @@ setReplaceMethod("estimators","Model", function(model, value){
   return(model)
 })
 
-
+setClassUnion("functionOrNULL", c("function", "NULL"))
 setClass("Estimator", representation(id="character" ,
                                      initialize = "function", 
                                      ini.values = "function", 
                                      logL = "function", 
-                                     gradient = "function", 
+                                     gradient = "functionOrNULL", 
                                      handle.estimates = "function"))
 setMethod("show", "Estimator",
     function(object){
@@ -43,8 +43,8 @@ setMethod("show", "Estimator",
 )
 setMethod("getId","Estimator", function(object){return(object@id)})
 
-setGenericVerif("run",function(estimator, formula, data,ini.values,...){standardGeneric("run")})
-setMethod("run","Estimator", function(estimator, formula, data,ini.values, ...){
+setGenericVerif("execute",function(estimator, formula, data,ini.values,...){standardGeneric("execute")})
+setMethod("execute","Estimator", function(estimator, formula, data,ini.values, ...){
   envir.init(...)
   logger.start()
   logger.debug("Estimator started")
@@ -70,7 +70,7 @@ setClass("ModelEstimates", representation(
 setMethod("show", "ModelEstimates",
           function(object){
             cat("ModelEstimates\n", sep="")
-            print(object@coefficients)
+            print(coef(object))
           }
 )
 setMethod("coef", "ModelEstimates",
@@ -103,7 +103,7 @@ registerEstimator = function(modelId, estimator){
 registerModel(new("Model", id = "frontierHN", name = "Non-spatial stohastic frontier model with half-normal inefficiencies"))
 registerModel(new("Model", id = "frontierTN", name = "Non-spatial stohastic frontier model with truncated normal inefficiencies"))
 registerModel(new("Model", id = "spfrontier100HN", name = "Spatial autoregressive stohastic frontier model with non-spatial disturbances and non-spatial half-normal inefficiencies"))
-registerModel(new("Model", id = "spfrontier101HN", name = "Spatial autoregressive stohastic frontier model with spatial autoregressive disturbances and non-spatial half-normal inefficiencies"))
+registerModel(new("Model", id = "spfrontier110HN", name = "Spatial autoregressive stohastic frontier model with spatial autoregressive disturbances and non-spatial half-normal inefficiencies"))
 registerModel(new("Model", id = "spfrontier111HN", name = "Spatial autoregressive stohastic frontier model with spatial autoregressive disturbances and spatial autoregressive half-normal inefficiencies"))
 registerModel(new("Model", id = "spfrontier111TN", name = "Spatial autoregressive stohastic frontier model with spatial autoregressive disturbances and spatial autoregressive truncated normal inefficiencies"))
 

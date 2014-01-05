@@ -24,14 +24,30 @@ spfrontier <- function(formula, data,
   #End of model parameters' validation 
   
   
-  modelEstimates <- run(estimator, formula,data,ini.values=ini.values,W=W_y,W2=W_v,W3=W_u,logging.level=logging,control=control)
+  modelEstimates <- execute(estimator, formula,data,ini.values=ini.values,W=W_y,W2=W_v,W3=W_u,logging.level=logging,control=control)
 }
 
-test <- function(){
+spfrontier.test <- function(){
   data( front41Data )
-  model <- spfrontier(log( output ) ~ log( capital ) + log( labour ), data = front41Data, logging="debug")
-  coef(model)
+  print("Estimator front41Data")
+  print(summary(sfa( log( output ) ~ log( capital ) + log( labour ), data = front41Data)))
+  #debug((estimators(.Models[["spfrontier111TN"]])[[1]])@logL)
+  #(estimators(.Models[["spfrontier110HN"]])[[1]])@gradient
   
-  debug((estimators(.Models[["frontierHN"]])[[1]])@initialize)
-  sfa( log( output ) ~ log( capital ) + log( labour ), data = front41Data)
+  print("Model frontierHN")
+  model <- spfrontier(log( output ) ~ log( capital ) + log( labour ), data = front41Data, logging="quiet")
+  print(model)
+  
+  
+  print("Model spfrontier100HN")
+  W_y <- genW(nrow(front41Data))
+  model <- spfrontier(log( output ) ~ log( capital ) + log( labour ),model="spfrontier100HN", W_y = W_y, data = front41Data, logging="quiet")
+  print(model)
+  
+  
+  print("Model spfrontier110HN")
+  W_y <- genW(nrow(front41Data))
+  W_v <- genW(nrow(front41Data), type="queen")
+  model <- spfrontier(log( output ) ~ log( capital ) + log( labour ),model="spfrontier110HN", W_y = W_y, W_v = W_v, data = front41Data, logging="debug")
+  print(model)
 }

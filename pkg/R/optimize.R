@@ -2,7 +2,8 @@ optim.estimator <- function(formula, data, func.lf, ini,gr=NULL){
   result <- NULL
   if (is.null(ini)){
     logger.debug("Ini is not defined",caller = match.call())
-    stop("Ini is not defined")
+    envir.assign("est.failed", TRUE)
+    return(NULL)
   }
   tryCatch({
     control <- envir.get("control")

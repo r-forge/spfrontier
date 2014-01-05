@@ -127,6 +127,7 @@ frontierHN.handle.estimates <- function(estimates){
     status <- 0
     coefs <- ord.reparamBack(frontierHN.params(as.vector(estimates$estimate)))
     logL <- estimates$value
+    logger.info("Estimates:",unlist(coefs))
   }else{
     status <- 1
   }
