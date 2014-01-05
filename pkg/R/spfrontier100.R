@@ -111,13 +111,3 @@ spfrontier100HN.handle.estimates <- function(estimates){
   )
   return(ret)
 }
-
-registerEstimator("spfrontier100HN",
-                  new("Estimator", 
-                      id = "mle", 
-                      initialize = spfrontier100HN.prepare, 
-                      ini.values = spfrontier100HN.ini, 
-                      logL = spfrontier100HN.logL, 
-                      gradient = spfrontier100HN.logL.gradient, 
-                      handle.estimates = spfrontier100HN.handle.estimates
-                  ))

@@ -139,13 +139,3 @@ frontierHN.handle.estimates <- function(estimates){
              )
   return(ret)
 }
-
-registerEstimator("frontierHN",
-                  new("Estimator", 
-                      id = "mle", 
-                      initialize = frontierHN.prepare, 
-                      ini.values = frontierHN.ini, 
-                      logL = frontierHN.logL, 
-                      gradient = frontierHN.logL.gradient, 
-                      handle.estimates = frontierHN.handle.estimates
-                      ))

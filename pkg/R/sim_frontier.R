@@ -16,7 +16,7 @@ frontierHN.dgp <- function(){
 
 frontierHN.estimator <- function(d){
   modelEstimates <- spfrontier(d$formula,d$data,model="frontierHN", logging = "debug")
-  out <- coef(modelEstimates)
+  out <- coefficients(modelEstimates)
   return(out)
 }
 

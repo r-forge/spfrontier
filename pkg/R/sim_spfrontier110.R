@@ -27,14 +27,14 @@ spfrontier110HN.estimator <- function(d){
     names(fake) <- names(d$tv)
     out <- fake #Livehack
   }else{
-    out <- coef(modelEstimates)
+    out <- coefficients(modelEstimates)
   }
   return(out)
 }
 
 spfrontier110HN.true.value <- function(){
-  tv <- c(beta0, beta1, beta2,rho,rho2,sigmaV, sigmaU)
-  names(tv) <- c("Beta0","Beta1","Beta2", "Rho","Rho2",  "SigmaV","SigmaU")
+  tv <- c(beta0, beta1, beta2,sigmaV, sigmaU,rho,rho2)
+  names(tv) <- c("Beta0","Beta1","Beta2",  "SigmaV","SigmaU", "Rho","Rho2")
   return(tv)
 }
 
@@ -43,8 +43,8 @@ ezsim_spfrontier110HN.test <- function(){
   ezsim_spfrontier110HN<-ezsim(
     m             = 1,
     run           = TRUE,
-    display_name  = c(beta0_hat="hat(beta)[0]",beta1_hat="hat(beta)[1]",beta2_hat="hat(beta)[2]",rho="rho",rho2="rho2",sigmaV_hat="hat(sigma)[v]",sigmaU_hat="hat(sigma)[u]"),
-    parameter_def = createParDef(selection = list(n=c(30),sigmaX=10, beta0=1,beta1=-2,beta2=3, rho=0.2,rho2=0.1, sigmaV=3, sigmaU=5)),
+    display_name  = c(beta0_hat="hat(beta)[0]",beta1_hat="hat(beta)[1]",beta2_hat="hat(beta)[2]",sigmaV_hat="hat(sigma)[v]",sigmaU_hat="hat(sigma)[u]",rho="rho",rho2="rho2"),
+    parameter_def = createParDef(selection = list(n=c(30),sigmaX=10, beta0=1,beta1=-2,beta2=3, sigmaV=3, sigmaU=5, rho=0.2,rho2=0.1)),
     dgp           = spfrontier110HN.dgp,
     estimator     = spfrontier110HN.estimator,
     true_value    = spfrontier110HN.true.value

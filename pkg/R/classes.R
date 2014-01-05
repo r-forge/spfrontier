@@ -1,4 +1,3 @@
-.Models = list()
 
 setClass("Model", representation(id="character", name="character" ,estimators = "list"))
 setMethod("show", "Model",
@@ -70,10 +69,10 @@ setClass("ModelEstimates", representation(
 setMethod("show", "ModelEstimates",
           function(object){
             cat("ModelEstimates\n", sep="")
-            print(coef(object))
+            print(coefficients(object))
           }
 )
-setMethod("coef", "ModelEstimates",
+setMethod("coefficients", "ModelEstimates",
           function(object){
             return(unlist(object@coefficients))
           }
@@ -98,13 +97,3 @@ registerEstimator = function(modelId, estimator){
   estimators(model) <- est
   registerModel(model)
 }
-
-
-registerModel(new("Model", id = "frontierHN", name = "Non-spatial stohastic frontier model with half-normal inefficiencies"))
-registerModel(new("Model", id = "frontierTN", name = "Non-spatial stohastic frontier model with truncated normal inefficiencies"))
-registerModel(new("Model", id = "spfrontier100HN", name = "Spatial autoregressive stohastic frontier model with non-spatial disturbances and non-spatial half-normal inefficiencies"))
-registerModel(new("Model", id = "spfrontier110HN", name = "Spatial autoregressive stohastic frontier model with spatial autoregressive disturbances and non-spatial half-normal inefficiencies"))
-registerModel(new("Model", id = "spfrontier111HN", name = "Spatial autoregressive stohastic frontier model with spatial autoregressive disturbances and spatial autoregressive half-normal inefficiencies"))
-registerModel(new("Model", id = "spfrontier111TN", name = "Spatial autoregressive stohastic frontier model with spatial autoregressive disturbances and spatial autoregressive truncated normal inefficiencies"))
-
-.Models
