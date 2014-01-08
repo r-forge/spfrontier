@@ -37,22 +37,22 @@ pmvnorm(lower=rep(-Inf,n),upper=x, sigma=diag(n))
 pmvnorm(lower=rep(-Inf,n),upper=2*x, sigma=4*diag(n))
 pnorm(1)
 pnorm(2, sd=2)
-  
+    
 draw2RV = function (func.density, theta, phi){
  x1 <- seq(-5, 5, by = 0.2)
-  x2 <- x1
-  
-  z <- outer(x1, x2, func.density)
-  print(sum(z))
-  nrz <- nrow(z)
-  ncz <- ncol(z)
-  nbcol <- 100
-  jet.colors <- colorRampPalette( c("blue", "red") )
-  color <- jet.colors(nbcol)
-  zfacet <- z[-1, -1] + z[-1, -ncz] + z[-nrz, -1] + z[-nrz, -ncz]
-  facetcol <- cut(zfacet, nbcol)
-  
-  persp(x1,x2, z, theta = theta , phi = phi , col=color[facetcol],xlab="X1", ylab="X2", zlab="f(x1,x2)")
+    x2 <- x1
+    
+    z <- outer(x1, x2, func.density)
+    print(sum(z))
+    nrz <- nrow(z)
+    ncz <- ncol(z)
+    nbcol <- 100
+    jet.colors <- colorRampPalette( c("blue", "red") )
+    color <- jet.colors(nbcol)
+    zfacet <- z[-1, -1] + z[-1, -ncz] + z[-nrz, -1] + z[-nrz, -ncz]
+    facetcol <- cut(zfacet, nbcol)
+    
+    persp(x1,x2, z, theta = theta , phi = phi , col=color[facetcol],xlab="X1", ylab="X2", zlab="f(x1,x2)")
 }
 x1 <- seq(-4, 4, by = 0.1)
 x2 <- x1
@@ -83,7 +83,7 @@ vnormal(1,2)/vnormal1(1,2)
 draw2RV(vnormal, 0, 30)
 draw2RV(vnormal1, 0, 30)
 for(theta in seq(0,180,10)){
-  draw2RV(vnormal, theta, 30)
+    draw2RV(vnormal, theta, 30)
 }
 
 

@@ -1,10 +1,11 @@
 Package: spfrontier
 Type: Package
-Title: What the package does (short line)
-Version: 1.0
-Date: 2013-10-07
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
-Depends: ezsim, tmvtnorm, frontier
+Title: Spatial Stochastic Frontier models estimation
+Version: 0.98.0
+Date: 2014-01-08
+Author: Dmitry Pavlyuk <Dmitry.V.Pavlyuk@gmail.com>
+Maintainer: Dmitry Pavlyuk <Dmitry.V.Pavlyuk@gmail.com>
+Description: A set of tools for estimation of various spatial specifications of stochastic frontier models
+License: GPL (>= 2)
+Depends: R (>= 2.14.0), methods, foreach
+Imports: ezsim, tmvtnorm, frontier, mvtnorm

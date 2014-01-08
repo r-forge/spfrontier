@@ -1,1 +1,20 @@
-exportPattern("^[[:alpha:]]+")
+#
+# Imports
+#
+import(methods)
+importFrom("stats", optim)
+importFrom("tmvtnorm", ptmvnorm, mtmvnorm)
+importFrom("mvtnorm", dmvnorm)
+import(foreach)
+importFrom("ezsim", ezsim, createParDef)
+
+#
+# Exports
+#
+
+export(spfrontier)
+export(genW, rowStdrt)
+
+# S4 classes and methods
+exportClasses(Model, Estimator, ModelEstimates)
+exportMethods(coefficients, fitted, residuals, summary, efficiencies)
