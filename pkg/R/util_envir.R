@@ -72,7 +72,7 @@ finalizeEnvir <- function(){
 envirGet <- function(name,...){
     res <- NULL
     if (exists(name, envir = getEstimatorEnvir(),...)){
-        res = get(name, envir = getEstimatorEnvir(),...)
+        res <- get(name, envir = getEstimatorEnvir(),...)
     }
     return(res)
 }

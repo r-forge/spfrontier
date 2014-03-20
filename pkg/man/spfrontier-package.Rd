@@ -1,12 +1,11 @@
 \name{spfrontier-package}
 \alias{spfrontier-package}
-\alias{spfrontier}
 \docType{package}
 \title{
-Spatial Stochastic Frontier estiomation
+Spatial Stochastic Frontier estimation
 }
 \description{
-Spatial Stochastic Frontier estiomation
+Spatial Stochastic Frontier estimation
 }
 \details{
 \tabular{ll}{
@@ -19,16 +18,12 @@ License: \tab LGPL\cr
 ~~ An overview of how to use the package, including the most important functions ~~
 }
 \author{
-Dmitry Pavlyuk <Dmitry.Pavlyuk@tsi.lv>
+Dmitry Pavlyuk <Dmitry.V.Pavlyuk@gmail.com>
 }
 \references{
-~~ Literature or other references for background information ~~
+Anselin, L. (1988). Spatial Econometrics: Methods and Models. Kluwer Academic Publishers, Dordrecht, The Netherlands.
 }
 \keyword{ package }
 \seealso{
 ~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
-}
-\examples{
-~~ simple examples of the most important functions ~~
 }

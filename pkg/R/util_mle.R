@@ -15,13 +15,10 @@ optimEstimator <- function(formula, data, func.lf, ini,gr=NULL){
     }
     tryCatch({
         control <- envirGet("control")
-        if(!is.null(control)) {
-            logging("Optimizer control",control)
-        }
         p<-optim(par=ini,fn=func.lf,gr=gr,
-                 method="BFGS", control=control,hessian = T)
+                 method="BFGS", control=control$optim.control,hessian = T)
         logging(paste("Convergence is",
-                      ifelse(p$convergence==0, "", "NOT"),"archieved",
+                      ifelse(p$convergence==0, "", "NOT"),"achieved",
                       "[",p$convergence,"]"),
                 level = "info",
                 caller = match.call())    
@@ -41,17 +38,20 @@ optimEstimator <- function(formula, data, func.lf, ini,gr=NULL){
 prepareEstimates <- function(estimates = NULL, status = 0){
     ret <- new("ModelEstimates", status = status)
     if (!is.null(estimates)) {
+        if (estimates$value == -Infin){
+            return(new("ModelEstimates", status = 1002))
+        }
         ret <- new("ModelEstimates",
                    resultParams = estimates$par,
                    status = estimates$convergence,
                    logL = estimates$value,
-                   logLcalls = estimates$counts
-                   )
-        
+                   logLcalls = estimates$counts,
+                   hessian = estimates$hessian
+        )
         #Setting hessian and implicitly calculating standard errors
-        if (!is.null(estimates$hessian)){
-            hessian(ret) <- estimates$hessian
-        }
+        #if (!is.null(estimates$hessian)){
+        #    hessian(ret) <- estimates$hessian
+        #}
     }
     return(ret)
 }

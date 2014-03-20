@@ -11,7 +11,7 @@
 # Logs a message, an (optional) object, and caller function's name to console
 #
 logging <- function(message, obj = NULL, level = "debug", caller = sys.call(-1)){
-        lvl <- envirGet("loggingLevel")
+        lvl <- envirGet("logging")
         if (!is.null(lvl) 
                 && ((which(.loggingLevels == lvl) >=    which(.loggingLevels == level)))){
                 message(toupper(level)," ", toString(caller[[1]])," ", message)
@@ -19,5 +19,6 @@ logging <- function(message, obj = NULL, level = "debug", caller = sys.call(-1))
                         print(obj)
                 }
                 flush.console()
+                Sys.sleep(0.1)
         }
 }
