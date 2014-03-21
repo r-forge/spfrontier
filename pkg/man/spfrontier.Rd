@@ -61,10 +61,7 @@ argument.
 }
 \examples{
 data( airports )
-W <- 1/as.matrix(dist(cbind(airports$lon, airports$lat)))
-colnames(W) <- airports$ICAO_code
-rownames(W) <- airports$ICAO_code
-W[which(W==Inf)] <- 0
+W <- constructW(cbind(airports$lon, airports$lat),airports$ICAO_code)
 
 formula <- log(PAX) ~ log(runways) + log(checkins) +log (gates)
 ols <- lm(formula , data=airports)
@@ -72,14 +69,50 @@ summary(ols )
 plot(density(stats::residuals(ols)))
 skewness(stats::residuals(ols))
 
-#model <- spfrontier(formula , data=airports, logging="info",control=list(maxit=1000))
-#summary(model )
+model <- spfrontier(formula , data=airports)
+summary(model )
 
-#model <- spfrontier(formula , data=airports, W_y=W, logging="info",control=list(maxit=1000))
-#summary(model )
+model <- spfrontier(formula , data=airports, W_y=W)
+summary(model )
 
+# Takes a long time
 #model <- spfrontier(formula , data=airports, W_y=W, W_v=W, logging="debug",control=list())
 #summary(model )
+
+
+
+data(airports.greece)
+formula <- log(WLU) ~ log(openning_hours) + log(runway_area) + log(terminal_area)
+W <- constructW(cbind(airports.greece$lon, airports.greece$lat),airports.greece$ICAO)
+
+
+
+model000 <- spfrontier(formula , data=airports.greece, logging="info")
+summary(model000 )
+
+model100 <- spfrontier(formula , data=airports.greece, logging="info", W_y=W)
+summary(model100 )
+
+# Takes a long time
+#model010 <- spfrontier(formula , data=airports.greece, logging="debug", W_v=W)
+#summary(model010 )
+#efficiencies(model010)
+
+# Takes a long time
+#model110 <- spfrontier(formula , data=airports.greece, logging="debug", W_y=W, W_v=W)
+#summary(model110)
+#efficiencies(model110)
+
+# Takes a long time
+#model001 <- spfrontier(formula , data=airports.greece, logging="debug", W_u=W)
+#summary(model001)
+#efficiencies(model001)
+
+
+
+data(airports.spain)
+formula <- -log(ATM) ~ log(APM/ATM) + log(DA) + log(staff_cost)
+W <- constructW(cbind(airports.spain$lon, airports.spain$lat),airports.spain$ICAO_code)
 }
 \references{
 Kumbhakar, S.C. and Lovell, C.A.K (2000), Stochastic

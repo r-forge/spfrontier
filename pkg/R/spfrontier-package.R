@@ -15,6 +15,7 @@ NULL
 #' 
 #' 
 #' @name airports
+#' @rdname data-airports
 #' @docType data
 #' @format A dataframe with 113 observations on the following 10 variables.
 #'
@@ -48,6 +49,7 @@ NULL
 #' 
 #' 
 #' @name airports.greece
+#' @rdname data-airports-greece
 #' @docType data
 #' @format A dataframe with 39 observations on the following 24 variables.
 #'
@@ -95,6 +97,7 @@ NULL
 #' 
 #' 
 #' @name airports.spain
+#' @rdname data-airports-spain
 #' @docType data
 #' @format A dataframe with 43 observations on the following 16 variables.
 #'

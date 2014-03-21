@@ -6,6 +6,8 @@ spfrontier.test <- function(){
     #Сделать gridSearch
     
     data( airports)
+    # To get rid of check note
+    airports <- airports
     
     W <- 1/as.matrix(dist(cbind(airports$lon, airports$lat)))
     colnames(W) <- airports$ICAO_code
@@ -50,7 +52,9 @@ spfrontier.test <- function(){
 
 spfrontier.test2 <- function(){
     
-    data( airports.spain.2010 )
+    data( airports.spain)
+    # To get rid of check note
+    airports.spain <- airports.spain
     
     #formula <- log(revenue) ~ log(APM) + log(ATM) + log(staff_cost)
     #formula <- -log(ATM) ~ log(APM/ATM) + log(DA) + log(staff_cost)+ log(terminals)+ log(runways)
@@ -101,6 +105,10 @@ spfrontier.test4 <- function(){
     data(airports.greece)
     #formula <- log(WLU) ~ log(openning_hours) + log(runway_area) + log(terminal_area) +log(parking_area)
     # Big VIF for parking area
+    
+    # To get rid of check note
+    airports.greece <- airports.greece
+    
     formula <- log(WLU) ~ log(openning_hours) + log(runway_area) + log(terminal_area)
     
     

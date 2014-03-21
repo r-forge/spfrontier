@@ -168,7 +168,8 @@ olsenGradient<- function(par){
 #' @keywords spatial stochastic frontier
 #' @references 
 #' Anselin, L. (1988). Spatial Econometrics: Methods and Models. Kluwer Academic Publishers, Dordrecht, The Netherlands.
-#' @export
+#' 
+#' @rdname util-misc
 #' @examples
 #' # Completely filled 10x10 rook contiguity matrix
 #' rookW <- genW(100)
@@ -217,6 +218,7 @@ genW <- function(n, type="rook"){
 #' 
 #' @param W a spatial contiguity matrix to be standatised
 #' 
+#' @rdname util-misc
 #' @examples
 #' 
 #' # Completely filled 10x10 queen contiguity matrix
@@ -249,6 +251,7 @@ rowStdrt = function(W){
 #' @param coords a matrix of two columns, where every row is a longitude-latitude pair of object coordinates
 #' @param labels a vector of object lables to mark rows and columns of the resulting contiguity matrix
 #' 
+#' @rdname util-misc
 #' @examples
 #' 
 #' data(airports)

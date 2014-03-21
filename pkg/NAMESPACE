@@ -15,7 +15,7 @@ importFrom("Matrix", nearPD)
 
 export(spfrontier)
 export(ezsimspfrontier)
-export(genW, rowStdrt)
+export(genW, rowStdrt,constructW)
 
 # S4 classes and methods
 exportClasses(ModelEstimates)
