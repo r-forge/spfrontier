@@ -170,17 +170,17 @@ olsenGradient<- function(par){
 #' Anselin, L. (1988). Spatial Econometrics: Methods and Models. Kluwer Academic Publishers, Dordrecht, The Netherlands.
 #' @export
 #' @examples
-#' #Completely filled 10x10 rook contiguity matrix
+#' # Completely filled 10x10 rook contiguity matrix
 #' rookW <- genW(100)
 #' rookW
 #' 
-#' #Partly filled 10x10 rook contiguity matrix
+#' # Partly filled 10x10 rook contiguity matrix
 #' rookW <- genW(90)
 #' rookW
 #' 
-#' #' #Completely filled 10x10 queen contiguity matrix
-#' rookW <- genW(90)
-#' rookW
+#' # Completely filled 10x10 queen contiguity matrix
+#' queenW <- genW(100, type="queen")
+#' queenW
 
 genW <- function(n, type="rook"){
     k <- ceiling(sqrt(n))
@@ -204,15 +204,67 @@ genW <- function(n, type="rook"){
     return(W)
 }
 
-#
-# Standartizes (by rows) spatial weight matrix
-#
+
+
+#' @title Spatial contiguity matrix standartisation
+#'
+#' @description
+#' \code{rowStdrt} standartizes spatial contiguity matrix by rows
+#' 
+#' @details
+#' The function divides every element in an argument matrix by the sum of elements in its row. Some spatial estimation requires this standartisation (generally - for faster calculations)
+#' 
+#' 
+#' @param W a spatial contiguity matrix to be standatised
+#' 
+#' @examples
+#' 
+#' # Completely filled 10x10 queen contiguity matrix
+#' queenW <- genW(100, type="queen")
+#' queenW
+#' 
+#' # Standartisation
+#' stQueenW <- rowStdrt(queenW)
+#' stQueenW
+#' 
+
 rowStdrt = function(W){
     for (j in 1:nrow(W)){
         W[j,] <- W[j,]/sum(W[j,])
     }
     return(W)
 }
+
+
+#' @title Spatial contiguity matrix construction
+#'
+#' @description
+#' \code{constructW} contructs a spatial contiguity matrix using object longitude and latitude coordinates
+#' 
+#' @details
+#' The function contructs a spatial contiguity matrix 
+#' using object longitude and latitude coordinates. Eucledean distance is currently used.
+#' 
+#' 
+#' @param coords a matrix of two columns, where every row is a longitude-latitude pair of object coordinates
+#' @param labels a vector of object lables to mark rows and columns of the resulting contiguity matrix
+#' 
+#' @examples
+#' 
+#' data(airports)
+#' 
+#' W <- constructW(cbind(airports$lon, airports$lat),airports$ICAO_code)
+#' 
+
+constructW <- function(coords, labels){
+    W <- 1/as.matrix(dist(coords))
+    colnames(W) <- labels
+    rownames(W) <- labels
+    W[which(W==Inf)] <- 0
+    return(W)
+}
+
+
 
 #
 # Returns significance code

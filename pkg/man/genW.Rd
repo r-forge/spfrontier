@@ -26,17 +26,17 @@ to the top. The last row contains empty cells, if n is not
 quadratic
 }
 \examples{
-#Completely filled 10x10 rook contiguity matrix
+# Completely filled 10x10 rook contiguity matrix
 rookW <- genW(100)
 rookW
 
-#Partly filled 10x10 rook contiguity matrix
+# Partly filled 10x10 rook contiguity matrix
 rookW <- genW(90)
 rookW
 
-#' #Completely filled 10x10 queen contiguity matrix
-rookW <- genW(90)
-rookW
+# Completely filled 10x10 queen contiguity matrix
+queenW <- genW(100, type="queen")
+queenW
 }
 \references{
 Anselin, L. (1988). Spatial Econometrics: Methods and

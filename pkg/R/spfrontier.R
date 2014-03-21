@@ -39,25 +39,59 @@
 #' @references 
 #' Kumbhakar, S.C. and Lovell, C.A.K (2000), Stochastic Frontier Analysis, Cambridge University Press, U.K.
 #' @examples
-#' data( airports2011 )
-#' W <- 1/as.matrix(dist(cbind(airports$lon, airports$lat)))
-#' colnames(W) <- airports$ICAO_code
-#' rownames(W) <- airports$ICAO_code
-#' W[which(W==Inf)] <- 0
+#' data( airports )
+#' W <- constructW(cbind(airports$lon, airports$lat),airports$ICAO_code)
 #' 
 #' formula <- log(PAX) ~ log(runways) + log(checkins) +log (gates)
 #' ols <- lm(formula , data=airports)
 #' summary(ols )
-#' plot(density(residuals(ols)))
-#' skewness(residuals(ols))
+#' plot(density(stats::residuals(ols)))
+#' skewness(stats::residuals(ols))
 #' 
-#' model <- spfrontier(formula , data=airports, logging="info",control=list(maxit=1000))
+#' model <- spfrontier(formula , data=airports)
 #' summary(model )
 #' 
-#' model <- spfrontier(formula , data=airports, W_y=W, logging="info",control=list(maxit=1000))
+#' model <- spfrontier(formula , data=airports, W_y=W)
 #' summary(model )
-#' model <- spfrontier(formula , data=airports, W_y=W, W_v=W, logging="debug",control=list())
-#' summary(model )
+#' 
+#' # Takes a long time
+#' #model <- spfrontier(formula , data=airports, W_y=W, W_v=W, logging="debug",control=list())
+#' #summary(model )
+#' 
+#' 
+#' 
+#' data(airports.greece)
+#' formula <- log(WLU) ~ log(openning_hours) + log(runway_area) + log(terminal_area)
+#' W <- constructW(cbind(airports.greece$lon, airports.greece$lat),airports.greece$ICAO)
+#' 
+#' 
+#' 
+#' model000 <- spfrontier(formula , data=airports.greece, logging="info")
+#' summary(model000 )
+#' 
+#' model100 <- spfrontier(formula , data=airports.greece, logging="info", W_y=W)
+#' summary(model100 )
+#' 
+#' # Takes a long time
+#' #model010 <- spfrontier(formula , data=airports.greece, logging="debug", W_v=W)
+#' #summary(model010 )
+#' #efficiencies(model010)
+#' 
+#' # Takes a long time
+#' #model110 <- spfrontier(formula , data=airports.greece, logging="debug", W_y=W, W_v=W)
+#' #summary(model110)
+#' #efficiencies(model110)
+#' 
+#' # Takes a long time
+#' #model001 <- spfrontier(formula , data=airports.greece, logging="debug", W_u=W)
+#' #summary(model001)
+#' #efficiencies(model001)
+#' 
+#' 
+#' 
+#' data(airports.spain)
+#' formula <- -log(ATM) ~ log(APM/ATM) + log(DA) + log(staff_cost)
+#' W <- constructW(cbind(airports.spain$lon, airports.spain$lat),airports.spain$ICAO_code)
 #' 
 spfrontier <- function(formula, data,
                        W_y = NULL, W_v = NULL,W_u = NULL,
@@ -159,11 +193,13 @@ spfrontier <- function(formula, data,
             logging(e$message, level="warn")
         })
         tryCatch({
+            logging("Calculating efficiencies...")
             if (is.null(p$rhoV) && is.null(p$rhoU) ){
                 sigma <- sqrt(p$sigmaU^2 + p$sigmaV^2)
                 A <- resid * (p$sigmaU / p$sigmaV) / sigma
                 u <- (dnorm(A) / (1 - pnorm(A)) - A) * p$sigmaU * p$sigmaV / sigma
             }else{
+                I <- diag(n)
                 SpV <- I
                 SpU <- I
                 
@@ -175,10 +211,20 @@ spfrontier <- function(formula, data,
                 mSigma = p$sigmaV^2*SpV%*%t(SpV)
                 mOmega = p$sigmaU^2*SpU%*%t(SpU)
                 mC = mSigma + mOmega
-                mB = mOmega%*%solve(mC)%*%mSigma 
+                imC <- solve(mC)
+                mB = mOmega%*%imC%*%mSigma 
+                
+                #Livehack for calculation precision
+                rownames(mB) <- colnames(mB)
+                mB <- as.matrix(nearPD(mB)$mat)
+                
                 mA = mB %*% solve(mSigma)
                 mD = -mB %*% solve(mOmega)
-                vMu = rep(p$mu, n)
+                mu <- 0
+                if(isTN){
+                    mu <- p$mu
+                }
+                vMu = rep(mu, n)
                 u <- mtmvnorm(lower= rep(0, n),mean=as.vector(t(-mA%*%resid-mD%*%vMu)), sigma=mB, doComputeVariance=FALSE)$tmean
             }
             eff <- cbind(exp(-u))
@@ -248,7 +294,7 @@ calculateInitialValues <- function (formula, data) {
         We <- W_v %*% e
         sarResiduals <- lm(e ~ We - 1, data = data.frame(e, We))
         iniParams$rhoV <- coef(sarResiduals)
-        mu <- -mean(residuals(sarResiduals))
+        mu <- -mean(stats::residuals(sarResiduals))
     }
     if (isSpU){
         iniParams$rhoU <- 0
@@ -310,7 +356,7 @@ gridSearch <- function(params){
 
 sfaInitialValues <- function(formula, data){
     ols <- lm(formula, data=data)
-    res_ols <- resid(ols)
+    res_ols <- stats::resid(ols)
     m2 = sum(res_ols^2)/length(res_ols)
     m3 = sum(res_ols^3)/length(res_ols)
     sigmaU = (m3*sqrt(pi/2)/(1-4/pi))^(1/3)

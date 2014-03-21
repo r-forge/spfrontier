@@ -2,9 +2,9 @@
 # Imports
 #
 import(methods)
-importFrom("stats", optim)
+importFrom("stats", optim,coefficients, fitted, residuals)
 importFrom("tmvtnorm", ptmvnorm, mtmvnorm, rtmvnorm)
-importFrom("mvtnorm", dmvnorm)
+importFrom("mvtnorm", dmvnorm, pmvnorm, rmvnorm)
 importFrom("moments", skewness)
 importFrom("ezsim", ezsim, createParDef,createSimulationTable)
 importFrom("Matrix", nearPD)

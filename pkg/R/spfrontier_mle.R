@@ -52,6 +52,8 @@ funcLogL <- function(parameters, quiet = F){
             imC <- solve(mC)
             mB <- mOmega%*%imC%*%mSigma 
             
+            #Livehack for calculation precision
+            rownames(mB) <- colnames(mB)
             mB <- as.matrix(nearPD(mB)$mat)
             
             mA <- mB %*% solve(mSigma)

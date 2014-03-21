@@ -60,7 +60,7 @@ included implicitly on the base of the \code{model}
 argument.
 }
 \examples{
-data( airports2011 )
+data( airports )
 W <- 1/as.matrix(dist(cbind(airports$lon, airports$lat)))
 colnames(W) <- airports$ICAO_code
 rownames(W) <- airports$ICAO_code
@@ -69,16 +69,17 @@ W[which(W==Inf)] <- 0
 formula <- log(PAX) ~ log(runways) + log(checkins) +log (gates)
 ols <- lm(formula , data=airports)
 summary(ols )
-plot(density(residuals(ols)))
-skewness(residuals(ols))
+plot(density(stats::residuals(ols)))
+skewness(stats::residuals(ols))
 
-model <- spfrontier(formula , data=airports, logging="info",control=list(maxit=1000))
-summary(model )
+#model <- spfrontier(formula , data=airports, logging="info",control=list(maxit=1000))
+#summary(model )
 
-model <- spfrontier(formula , data=airports, W_y=W, logging="info",control=list(maxit=1000))
-summary(model )
-model <- spfrontier(formula , data=airports, W_y=W, W_v=W, logging="debug",control=list())
-summary(model )
+#model <- spfrontier(formula , data=airports, W_y=W, logging="info",control=list(maxit=1000))
+#summary(model )
+
+#model <- spfrontier(formula , data=airports, W_y=W, W_v=W, logging="debug",control=list())
+#summary(model )
 }
 \references{
 Kumbhakar, S.C. and Lovell, C.A.K (2000), Stochastic

@@ -5,7 +5,7 @@ spfrontier.test <- function(){
     #ezsimspfrontier(10, params=params001, seed=0)
     #Сделать gridSearch
     
-    data( airports2011 )
+    data( airports)
     
     W <- 1/as.matrix(dist(cbind(airports$lon, airports$lat)))
     colnames(W) <- airports$ICAO_code
@@ -18,8 +18,8 @@ spfrontier.test <- function(){
     
     ols <- lm(formula , data=airports)
     summary(ols )
-    plot(density(residuals(ols)))
-    skewness(residuals(ols))
+    plot(density(stats::residuals(ols)))
+    skewness(stats::residuals(ols))
     
     sfa <- sfa(formula , data=airports)
     summary(sfa )
@@ -57,86 +57,52 @@ spfrontier.test2 <- function(){
     
     formula <- -log(ATM) ~ log(APM/ATM) + log(DA) + log(staff_cost)
     
-    data.spain2010 <- data.spain2010[-which.max(residuals(ols)),]
+    airports.spain <- airports.spain[-which.max(stats::residuals(ols)),]
     
-    ols <- lm(formula , data=data.spain2010)
-    data.spain2010 <- data.spain2010[-which.max(residuals(ols)),]
-    ols <- lm(formula , data=data.spain2010)
+    ols <- lm(formula , data=airports.spain)
+    airports.spain <- airports.spain[-which.max(stats::residuals(ols)),]
+    ols <- lm(formula , data=airports.spain)
     summary(ols )
-    plot(density(residuals(ols)))
-    skewness(residuals(ols))
+    plot(density(stats::residuals(ols)))
+    skewness(stats::residuals(ols))
     
     
-    sfa <- sfa(formula , data=data.spain2010)
-    summary(sfa )
-    plot(density(residuals(sfa )))
-    
-    W <- 1/as.matrix(dist(cbind(data.spain2010$lon, data.spain2010$lat)))
-    colnames(W) <- data.spain2010$ICAO_code
-    rownames(W) <- data.spain2010$ICAO_code
+    W <- 1/as.matrix(dist(cbind(airports.spain$lon, airports.spain$lat)))
+    colnames(W) <- airports.spain$ICAO_code
+    rownames(W) <- airports.spain$ICAO_code
     W[which(W==Inf)] <- 0
     
     
     
-    model <- spfrontier(formula , data=data.spain2010, logging="info",control=list(maxit=1000,reltol=1e-16))
+    model <- spfrontier(formula , data=airports.spain, logging="info",control=list(maxit=1000,reltol=1e-16))
     summary(model )
     
-    model <- spfrontier(formula , data=data.spain2010, W_y=W, logging="info",control=list(maxit=1000,reltol=1e-16))
+    model <- spfrontier(formula , data=airports.spain, W_y=W, logging="info",control=list(maxit=1000,reltol=1e-16))
     summary(model )
     plot(density(residuals(model )))
     
     #Эта работает!formula <- -log(ATM) ~ log(APM/ATM) + log(DA) + log(staff_cost) - при удалении выброса (чтобы скос был отрицательным)
-    model <- spfrontier(formula , data=data.spain2010, W_v=W, logging="info")
+    model <- spfrontier(formula , data=airports.spain, W_v=W, logging="info")
     summary(model )
     
-    model <- spfrontier(formula , data=data.spain2010, W_y=W, W_v=W, logging="info")
+    model <- spfrontier(formula , data=airports.spain, W_y=W, W_v=W, logging="info")
     summary(model )
     
-    model <- spfrontier(formula , data=data.spain2010,  W_u=W, logging="info",control=list())
+    model <- spfrontier(formula , data=airports.spain,  W_u=W, logging="info",control=list())
     summary(model )
     
     
-    model <- spfrontier(formula , data=data.spain2010, W_y=W, W_v=W,  W_u=W, logging="info")
+    model <- spfrontier(formula , data=airports.spain, W_y=W, W_v=W,  W_u=W, logging="info")
     summary(model )
 }
-
-
-spfrontier.test3 <- function(){
-    data(front41Data)
-    cobbDouglas <- sfa( log( output ) ~ log( capital ) + log( labour ), data = front41Data )
-    print(summary( cobbDouglas ))
-    
-    
-    cobbDouglasT <- sfa( log( output ) ~ log( capital ) + log( labour ), data = front41Data, truncNorm=T )
-    print(summary( cobbDouglasT ))
-    
-    
-    model <- spfrontier( log( output ) ~ log( capital ) + log( labour ), data = front41Data, logging="info")
-    print(summary( model ))
-    
-    model <- spfrontier( log( output ) ~ log( capital ) + log( labour ), data = front41Data, inefficiency="truncated",logging="info")
-    print(summary( model ))
-    
-    
-    W <- genW(nrow(front41Data))
-    Wq <- genW(nrow(front41Data), type="queen")
-    
-    model <- spfrontier( log( output ) ~ log( capital ) + log( labour ), data = front41Data, W_y = W, logging="info")
-    print(summary( model ))
-    
-    model <- spfrontier(log( output ) ~ log( capital ) + log( labour ), data = front41Data, W_y = W, W_v = Wq, logging="debug")
-    print(summary(model))
-    
-}
-
 
 spfrontier.test4 <- function(){
     
-    data( airports.greece )
-    formula <- log(WLU) ~ log(openning_hours) + log(runway_area) + log(terminal_area) +log(parking_area)
+    data(airports.greece)
+    #formula <- log(WLU) ~ log(openning_hours) + log(runway_area) + log(terminal_area) +log(parking_area)
+    # Big VIF for parking area
+    formula <- log(WLU) ~ log(openning_hours) + log(runway_area) + log(terminal_area)
     
-    sfa <- sfa(formula , data=airports.greece)
-    summary(sfa )
     
     W <- 1/as.matrix(dist(cbind(airports.greece$lon, airports.greece$lat)))
     colnames(W) <- airports.greece$ICAO
@@ -153,8 +119,8 @@ spfrontier.test4 <- function(){
     model <- spfrontier(formula , data=airports.greece, logging="info", W_y=W)
     summary(model )
     
-    # ini <- c(-5.624516608,1.894072073,-0.330861597,0.485801714,0.231013146,0.610346959,0.007689081,-0.027243936)
-    model <- spfrontier(formula , data=airports.greece, logging="debug", W_v=W,initialValues=ini)
+    ini <- c(-5.624516608,1.894072073,-0.330861597,0.485801714,0.231013146,0.610346959,0.007689081,-0.027243936)
+    model <- spfrontier(formula , data=airports.greece, logging="debug", W_v=W)
     summary(model )
     
     # -5.6234145  1.9277522 -0.3486990  0.4720372  0.2356252  0.5312435  1.0359464 -0.8000000
