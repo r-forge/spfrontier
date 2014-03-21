@@ -1,11 +1,9 @@
 beta0 = beta1 = beta2 = sigmaV = sigmaU = n = sigmaX = rhoY = rhoV = rhoU = mu = NULL
 
-.ezEnv <- new.env(hash = TRUE)
-
 spfrontier.dgp <- function(){
     run <- 0
-    if (exists("ezsim_run", envir = .ezEnv)){
-        run <- get("ezsim_run", envir = .ezEnv)
+    if (exists("ezsim_run", envir=.GlobalEnv)){
+        run <- get("ezsim_run", envir=.GlobalEnv)
     }
     
     if (!is.null(mu)){
@@ -15,8 +13,8 @@ spfrontier.dgp <- function(){
     }
     run <- run + 1
     print(paste("RUN",run))
-    assign("ezsim_run", run, envir = .ezEnv)
-    .parDef <- get("parDef", envir = .ezEnv)
+    assign("ezsim_run", run, envir=.GlobalEnv)
+    .parDef <- get("parDef", envir=.GlobalEnv)
     
     formula <- as.formula("y ~ X1 + X2")
     beta<-c(beta1,beta2)
@@ -65,13 +63,12 @@ spfrontier.dgp <- function(){
     colnames(dat) <-c('y',paste("X", seq(k), sep = ""))
     tv <- evalFunctionOnParameterDef(.parDef,spfrontier.true.value)
     result <- list(formula=formula, data=dat,W_y=W_y,W_v=W_v,W_u=W_u, tv=tv)
-    print("DGP generation... Done!")
     return(result)
 }
 
 spfrontier.estimator <- function(d){
-    .logging <- get("logging", envir = .ezEnv)
-    .inefficiency <- get("inefficiency", envir = .ezEnv)
+    .logging <- get("loggingLevel", envir=.GlobalEnv)
+    .inefficiency <- get("inefficiency", envir=.GlobalEnv)
     modelEstimates <- spfrontier(d$formula,d$data,W_y=d$W_y,W_v=d$W_v,W_u=d$W_u,logging = .logging,inefficiency=.inefficiency,onlyCoef=T,
                                  control=list())
     if (status(modelEstimates) > 0){ 
@@ -85,6 +82,17 @@ spfrontier.estimator <- function(d){
     }
     return(out)
 }
+
+
+#' @title True value for simulation
+#'
+#' @description
+#' \code{spfrontier.true.value} returns true parameter values for a simulation process
+#' 
+#' @details
+#' The \code{spfrontier.true.value} function should notbe used directly, it is exported for supporting \code{\link{ezsim}}
+#' 
+#' @rdname simulation
 
 spfrontier.true.value <- function(){
     tv <- c(beta0, beta1, beta2)
@@ -111,37 +119,6 @@ spfrontier.true.value <- function(){
     return(tv)
 }
 
-params000 <- list(n=c(100),
-                          sigmaX=10, 
-                          beta0=1,
-                          beta1=-2,
-                          beta2=3, 
-                          sigmaV=0.2, 
-                          sigmaU=0.75)
-params000T <- params000
-params000T$mu <- 0.4
-
-params100 <- params000
-params100$rhoY <- 0.6
-
-params100T <- params000T
-params100T$rhoY <- 0.6
-
-
-params110 <- params100
-params110$rhoV <- 0.7
-
-params010 <- params110
-params010$rhoY <- NULL
-
-params111 <- params110
-params111$rhoU <- 0.5
-
-params011 <- params111
-params011$rhoY <- NULL
-
-params001 <- params011
-params001$rhoV <- NULL
 
 
 
@@ -178,35 +155,32 @@ params001$rhoV <- NULL
 #' @export
 #' @seealso 
 #' \code{\link{ezsim}}
+#' 
 #' @examples
 #' 
-#' #res <- ezsimspfrontier(100, params = params000,  seed = 999, inefficiency = "half-normal",logging = "info")
-#' #res <- ezsimspfrontier(100, params = params000T, seed = 999, inefficiency = "truncated",logging = "info")
-#' #res <- ezsimspfrontier(100, params = params100,  seed = 999, inefficiency = "half-normal",logging = "info")
-#' #res <- ezsimspfrontier(100, params = params100T, seed = 999, inefficiency = "truncated",logging = "info")
-#' #All tests above work as appropriate
-#' #res <- ezsimspfrontier(10, params = params010, seed = 999, inefficiency = "half-normal",logging = "debug")
-#' #A problem with sigmaV
-#' #res <- ezsimspfrontier(10, params = params001, seed = 999, inefficiency = "half-normal",logging = "info")
-#' #res <- ezsimspfrontier(10, params = params110, seed = 999, inefficiency = "half-normal",logging = "info")
-#' #res <- ezsimspfrontier(10, params = params111, seed = 999, inefficiency = "half-normal",logging = "info")
-#' #res <- ezsimspfrontier(10, params = params011, seed = 999, inefficiency = "half-normal",logging = "info")
+#' beta0 = beta1 = beta2 = sigmaV = sigmaU = n = sigmaX = rhoY = rhoV = rhoU = mu = NULL
+#' params <- list(n=c(50,100), sigmaX=10, beta0=1, beta1=-2, beta2=3, sigmaV=0.2, sigmaU=0.75)
+#' res <- ezsimspfrontier(10, params = params,  seed = 99, inefficiency = "half-normal",logging = "quiet")
+#' summary(res)
+#' plot(res)
+#' plot(res, 'density')
 #' 
+#' @rdname simulation
 
 ezsimspfrontier <- function(runs, 
                                  autoSave = 0, 
-                                 params = params000,
+                                 params = list(n=c(50,100), sigmaX=10, beta0=1, beta1=-2, beta2=3, sigmaV=0.2, sigmaU=0.75),
                                  seed = NULL,
                             inefficiency = "half-normal",
                             logging = "info"){
     if (!is.null(seed)) set.seed(seed)
     parDef <- createParDef(params)
-    if (exists("ezsim_run", envir = .ezEnv)){
-        rm("ezsim_run", envir = .ezEnv)
+    if ( exists("ezsim_run", envir=.GlobalEnv)){
+        assign("ezsim_run",0, envir=.GlobalEnv)
     }
-    assign("parDef", parDef, envir = .ezEnv)
-    assign("logging", logging, envir = .ezEnv)
-    assign("inefficiency", inefficiency, envir = .ezEnv)
+    assign("parDef", parDef, envir=.GlobalEnv)
+    assign("loggingLevel", logging, envir=.GlobalEnv)
+    assign("inefficiency", inefficiency, envir=.GlobalEnv)
     ezsim_spfrontier<-ezsim(
         m                         = runs,
         run                     = TRUE,
@@ -217,14 +191,7 @@ ezsimspfrontier <- function(runs,
         auto_save = autoSave
     )
     
-    
-    
     ezsim_spfrontier <- clearFakes(ezsim_spfrontier)
-    #summary(ezsim_sararsfa111)
-    
-    #plot(density(ezsim_spfrontier$results[[1]]$rhoY))
-    #plot(density(ezsim_spfrontier$results[[1]]$rhoV))
-    #plot(density(ezsim_spfrontier$results[[1]]$ru))
     return(ezsim_spfrontier)
 }
 

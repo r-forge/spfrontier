@@ -1,9 +1,13 @@
-\name{ezsimspfrontier}
+\name{spfrontier.true.value}
 \alias{ezsimspfrontier}
-\title{Spatial stochastic frontier model simulation tests}
+\alias{spfrontier.true.value}
+\title{True value for simulation}
 \usage{
-ezsimspfrontier(runs, autoSave = 0, params = params000, seed = NULL,
-  inefficiency = "half-normal", logging = "info")
+spfrontier.true.value()
+
+ezsimspfrontier(runs, autoSave = 0, params = list(n = c(50, 100), sigmaX =
+  10, beta0 = 1, beta1 = -2, beta2 = 3, sigmaV = 0.2, sigmaU = 0.75),
+  seed = NULL, inefficiency = "half-normal", logging = "info")
 }
 \arguments{
   \item{runs}{a number of simulated samples}
@@ -49,27 +53,28 @@ ezsimspfrontier(runs, autoSave = 0, params = params000, seed = NULL,
   to quiet.}
 }
 \description{
+\code{spfrontier.true.value} returns true parameter values
+for a simulation process
+
 \code{ezsimspfrontier} tests estimators of a spatial
 stochastic frontier model with different parameters
 }
 \details{
+The \code{spfrontier.true.value} function should notbe used
+directly, it is exported for supporting \code{\link{ezsim}}
+
 The \code{ezsimspfrontier} function executes multiple calls
 of the \code{spfrontier} estimator on a simulated data set,
 generated on the base of provided parameters. The resulting
 estimates can be analysed for biasedness, efficiency, etc.
 }
 \examples{
-#res <- ezsimspfrontier(100, params = params000,  seed = 999, inefficiency = "half-normal",logging = "info")
-#res <- ezsimspfrontier(100, params = params000T, seed = 999, inefficiency = "truncated",logging = "info")
-#res <- ezsimspfrontier(100, params = params100,  seed = 999, inefficiency = "half-normal",logging = "info")
-#res <- ezsimspfrontier(100, params = params100T, seed = 999, inefficiency = "truncated",logging = "info")
-#All tests above work as appropriate
-#res <- ezsimspfrontier(10, params = params010, seed = 999, inefficiency = "half-normal",logging = "debug")
-#A problem with sigmaV
-#res <- ezsimspfrontier(10, params = params001, seed = 999, inefficiency = "half-normal",logging = "info")
-#res <- ezsimspfrontier(10, params = params110, seed = 999, inefficiency = "half-normal",logging = "info")
-#res <- ezsimspfrontier(10, params = params111, seed = 999, inefficiency = "half-normal",logging = "info")
-#res <- ezsimspfrontier(10, params = params011, seed = 999, inefficiency = "half-normal",logging = "info")
+beta0 = beta1 = beta2 = sigmaV = sigmaU = n = sigmaX = rhoY = rhoV = rhoU = mu = NULL
+params <- list(n=c(50,100), sigmaX=10, beta0=1, beta1=-2, beta2=3, sigmaV=0.2, sigmaU=0.75)
+res <- ezsimspfrontier(10, params = params,  seed = 99, inefficiency = "half-normal",logging = "quiet")
+summary(res)
+plot(res)
+plot(res, 'density')
 }
 \seealso{
 \code{\link{ezsim}}

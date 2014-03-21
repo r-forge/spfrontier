@@ -14,7 +14,7 @@ importFrom("Matrix", nearPD)
 #
 
 export(spfrontier)
-export(ezsimspfrontier)
+export(ezsimspfrontier,spfrontier.true.value)
 export(genW, rowStdrt,constructW)
 
 # S4 classes and methods
