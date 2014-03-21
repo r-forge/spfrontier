@@ -69,10 +69,19 @@ generated on the base of provided parameters. The resulting
 estimates can be analysed for biasedness, efficiency, etc.
 }
 \examples{
+# Define the full list of parameters - necessary for \\code{\\link{ezsim}} simulation
 beta0 = beta1 = beta2 = sigmaV = sigmaU = n = sigmaX = rhoY = rhoV = rhoU = mu = NULL
+
+# Define parameter values
 params <- list(n=c(50,100), sigmaX=10, beta0=1, beta1=-2, beta2=3, sigmaV=0.2, sigmaU=0.75)
+
+# Run simulations (10 runs)
 res <- ezsimspfrontier(10, params = params,  seed = 99, inefficiency = "half-normal",logging = "quiet")
+
+# Summary of simulation results
 summary(res)
+
+# Plot estimates' convergence to true values and estimates' density
 plot(res)
 plot(res, 'density')
 }
