@@ -1,7 +1,7 @@
 Package: spfrontier
 Type: Package
 Title: Spatial Stochastic Frontier models estimation
-Version: 0.1.1
+Version: 0.1.2
 Date: 2014-01-08
 Author: Dmitry Pavlyuk <Dmitry.V.Pavlyuk@gmail.com>
 Maintainer: Dmitry Pavlyuk <Dmitry.V.Pavlyuk@gmail.com>
