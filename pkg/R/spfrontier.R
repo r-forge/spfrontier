@@ -54,45 +54,6 @@
 #' model <- spfrontier(formula , data=airports, W_y=W)
 #' summary(model )
 #' 
-#' # Takes a long time
-#' #model <- spfrontier(formula , data=airports, W_y=W, W_v=W, logging="debug",control=list())
-#' #summary(model )
-#' 
-#' 
-#' 
-#' data(airports.greece)
-#' formula <- log(WLU) ~ log(openning_hours) + log(runway_area) + log(terminal_area)
-#' W <- constructW(cbind(airports.greece$lon, airports.greece$lat),airports.greece$ICAO)
-#' 
-#' 
-#' 
-#' model000 <- spfrontier(formula , data=airports.greece, logging="info")
-#' summary(model000 )
-#' 
-#' model100 <- spfrontier(formula , data=airports.greece, logging="info", W_y=W)
-#' summary(model100 )
-#' 
-#' # Takes a long time
-#' #model010 <- spfrontier(formula , data=airports.greece, logging="debug", W_v=W)
-#' #summary(model010 )
-#' #efficiencies(model010)
-#' 
-#' # Takes a long time
-#' #model110 <- spfrontier(formula , data=airports.greece, logging="debug", W_y=W, W_v=W)
-#' #summary(model110)
-#' #efficiencies(model110)
-#' 
-#' # Takes a long time
-#' #model001 <- spfrontier(formula , data=airports.greece, logging="debug", W_u=W)
-#' #summary(model001)
-#' #efficiencies(model001)
-#' 
-#' 
-#' 
-#' data(airports.spain)
-#' formula <- -log(ATM) ~ log(APM/ATM) + log(DA) + log(staff_cost)
-#' W <- constructW(cbind(airports.spain$lon, airports.spain$lat),airports.spain$ICAO_code)
-#' 
 spfrontier <- function(formula, data,
                        W_y = NULL, W_v = NULL,W_u = NULL,
                        inefficiency = "half-normal",
