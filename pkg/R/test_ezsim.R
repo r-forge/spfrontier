@@ -1,20 +1,11 @@
-beta0 = beta1 = beta2 = sigmaV = sigmaU = n = sigmaX = rhoY = rhoV = rhoU = mu = NULL
+beta0 = beta1 = beta2 = sigmaV = sigmaU = n = sigmaX = rhoY = rhoV = rhoU = mu =loggingLevel= inefficiency=parDef=NULL
 
 spfrontier.dgp <- function(){
-    run <- 0
-    if (exists("ezsim_run", envir=.GlobalEnv)){
-        run <- get("ezsim_run", envir=.GlobalEnv)
-    }
-    
     if (!is.null(mu)){
         if (abs(mu)>sigmaU){
             cat("DGP: Truncated normal mean (mu) is higher than standard deviation, which can lead to non-skewed residuals")
         }
     }
-    run <- run + 1
-    print(paste("RUN",run))
-    assign("ezsim_run", run, envir=.GlobalEnv)
-    .parDef <- get("parDef", envir=.GlobalEnv)
     
     formula <- as.formula("y ~ X1 + X2")
     beta<-c(beta1,beta2)
@@ -50,7 +41,7 @@ spfrontier.dgp <- function(){
         cat("DGP: Skewness of generated residuals is non-negative = ",sk)
     }
     
-    plot(density(v - u))
+    #plot(density(v - u))
     y <- beta0 + X %*% beta + v - u
     
     W_y <- NULL
@@ -61,15 +52,15 @@ spfrontier.dgp <- function(){
     }
     dat <- data.frame(y,X)
     colnames(dat) <-c('y',paste("X", seq(k), sep = ""))
-    tv <- evalFunctionOnParameterDef(.parDef,spfrontier.true.value)
-    result <- list(formula=formula, data=dat,W_y=W_y,W_v=W_v,W_u=W_u, tv=tv)
+    tv <- evalFunctionOnParameterDef(parDef,spfrontier.true.value)
+    result <- list(formula=formula, data=dat,W_y=W_y,W_v=W_v,W_u=W_u, tv=tv,
+                   loggingLevel=loggingLevel,inefficiency=inefficiency)
     return(result)
 }
 
 spfrontier.estimator <- function(d){
-    .logging <- get("loggingLevel", envir=.GlobalEnv)
-    .inefficiency <- get("inefficiency", envir=.GlobalEnv)
-    modelEstimates <- spfrontier(d$formula,d$data,W_y=d$W_y,W_v=d$W_v,W_u=d$W_u,logging = .logging,inefficiency=.inefficiency,onlyCoef=T,
+    modelEstimates <- spfrontier(d$formula,d$data,W_y=d$W_y,W_v=d$W_v,W_u=d$W_u,
+                                 logging = d$loggingLevel,inefficiency=d$inefficiency,onlyCoef=T,
                                  control=list())
     if (status(modelEstimates) > 0){ 
         fake = rep(1000,length(d$tv))
@@ -158,46 +149,48 @@ spfrontier.true.value <- function(){
 #' 
 #' @examples
 #' 
-#' # Define the full list of parameters - necessary for \code{\link{ezsim}} simulation
-#' beta0 = beta1 = beta2 = sigmaV = sigmaU = n = sigmaX = rhoY = rhoV = rhoU = mu = NULL
-#' 
 #' # Define parameter values
-#' params <- list(n=c(50,100), sigmaX=10, beta0=1, beta1=-2, beta2=3, sigmaV=0.2, sigmaU=0.75)
+#' # params <- list(n=c(50,100), 
+#' #                  sigmaX=10, 
+#' #                  beta0=1, 
+#' #                  beta1=-2, 
+#' #                  beta2=3, 
+#' #                  sigmaV=0.2, 
+#' #                  sigmaU=0.75)
 #' 
 #' # Run simulations (10 runs)
-#' res <- ezsimspfrontier(10, params = params,  seed = 99, inefficiency = "half-normal",logging = "quiet")
-#' 
+#' # res <- ezsimspfrontier(10, 
+#' #                          params = params,  
+#' #                          seed = 99, 
+#' #                          inefficiency = "half-normal",
+#' #                          logging = "quiet")
+#' # 
 #' # Summary of simulation results
-#' summary(res)
+#' # summary(res)
 #' 
 #' # Plot estimates' convergence to true values and estimates' density
-#' plot(res)
-#' plot(res, 'density')
+#' #plot(res)
+#' #plot(res, 'density')
 #' 
 #' @rdname simulation
 
 ezsimspfrontier <- function(runs, 
-                                 autoSave = 0, 
-                                 params = list(n=c(50,100), sigmaX=10, beta0=1, beta1=-2, beta2=3, sigmaV=0.2, sigmaU=0.75),
-                                 seed = NULL,
+                            autoSave = 0, 
+                            params = list(n=c(50,100), sigmaX=10, beta0=1, beta1=-2, beta2=3, sigmaV=0.2, sigmaU=0.75),
+                            seed = NULL,
                             inefficiency = "half-normal",
                             logging = "info"){
     if (!is.null(seed)) set.seed(seed)
-    parDef <- createParDef(params)
-    if ( exists("ezsim_run", envir=.GlobalEnv)){
-        assign("ezsim_run",0, envir=.GlobalEnv)
-    }
-    assign("parDef", parDef, envir=.GlobalEnv)
-    assign("loggingLevel", logging, envir=.GlobalEnv)
-    assign("inefficiency", inefficiency, envir=.GlobalEnv)
+    parDef <- createParDef(selection = params, banker = list(loggingLevel=logging,inefficiency=inefficiency,parDef=params))
+
     ezsim_spfrontier<-ezsim(
-        m                         = runs,
-        run                     = TRUE,
+        m             = runs,
+        run           = TRUE,
         parameter_def = parDef,
         dgp           = spfrontier.dgp,
         estimator     = spfrontier.estimator,
         true_value    = spfrontier.true.value,
-        auto_save = autoSave
+        auto_save   = autoSave
     )
     
     ezsim_spfrontier <- clearFakes(ezsim_spfrontier)

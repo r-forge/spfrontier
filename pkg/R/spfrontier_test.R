@@ -5,7 +5,7 @@ spfrontier.test <- function(){
     #ezsimspfrontier(10, params=params001, seed=0)
     #Сделать gridSearch
     
-    data( airports)
+    data( airports, envir = environment())
     # To get rid of check note
     airports <- airports
     
@@ -52,7 +52,7 @@ spfrontier.test <- function(){
 
 spfrontier.test2 <- function(){
     
-    data( airports.spain)
+    data( airports.spain, envir = environment())
     # To get rid of check note
     airports.spain <- airports.spain
     
@@ -102,7 +102,7 @@ spfrontier.test2 <- function(){
 
 spfrontier.test4 <- function(){
     
-    data(airports.greece)
+    data(airports.greece, envir = environment())
     #formula <- log(WLU) ~ log(openning_hours) + log(runway_area) + log(terminal_area) +log(parking_area)
     # Big VIF for parking area
     

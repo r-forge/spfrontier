@@ -1,6 +1,7 @@
 require(spfrontier)
 
 beta0 = beta1 = beta2 = sigmaV = sigmaU = n = sigmaX = rhoY = rhoV = rhoU = mu = NULL
+
 params000 <- list(n=c(100),
                   sigmaX=10, 
                   beta0=1,
@@ -10,7 +11,7 @@ params000 <- list(n=c(100),
                   sigmaU=0.75)
 
 params000T <- params000
-params000T$mu <- 0.4
+params000T$Mu <- 0.4
 
 params100 <- params000
 params100$rhoY <- 0.6
