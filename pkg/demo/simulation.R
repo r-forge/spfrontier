@@ -1,8 +1,7 @@
-require(spfrontier)
 
-beta0 = beta1 = beta2 = sigmaV = sigmaU = n = sigmaX = rhoY = rhoV = rhoU = mu = NULL
+beta0 = beta1 = beta2 = sigmaV = sigmaU = n = sigmaX = rhoY = rhoV = rhoU = mu =loggingLevel= inefficiency=parDef=control=NULL
 
-params000 <- list(n=c(100),
+params000 <- list(n=c(50, 100, 300),
                   sigmaX=10, 
                   beta0=1,
                   beta1=-2,
@@ -11,7 +10,7 @@ params000 <- list(n=c(100),
                   sigmaU=0.75)
 
 params000T <- params000
-params000T$Mu <- 0.4
+params000T$mu <- 0.4
 
 params100 <- params000
 params100$rhoY <- 0.6
@@ -35,10 +34,11 @@ params011$rhoY <- NULL
 params001 <- params011
 params001$rhoV <- NULL
 
-#res <- ezsimspfrontier(100, params = params000,  seed = 999, inefficiency = "half-normal",logging = "info")
-#res <- ezsimspfrontier(100, params = params000T, seed = 999, inefficiency = "truncated",logging = "info")
-#res <- ezsimspfrontier(100, params = params100,  seed = 999, inefficiency = "half-normal",logging = "info")
-#res <- ezsimspfrontier(100, params = params100T, seed = 999, inefficiency = "truncated",logging = "info")
+#res000 <- ezsimspfrontier(100, params = params000,  seed = 999, inefficiency = "half-normal",logging = "info")
+#res100 <- ezsimspfrontier(100, params = params100,  seed = 999, inefficiency = "half-normal",logging = "info")
+#res100_bias <- ezsimspfrontier(100, params = params100,  seed = 999, inefficiency = "half-normal",logging = "info", control=list(ignoreWy=T))
+#res000T <- ezsimspfrontier(100, params = params000T, seed = 999, inefficiency = "truncated",logging = "info")
+#res100T <- ezsimspfrontier(100, params = params100T, seed = 999, inefficiency = "truncated",logging = "info")
 #All tests above work as appropriate
 #res <- ezsimspfrontier(10, params = params010, seed = 999, inefficiency = "half-normal",logging = "debug")
 #A problem with sigmaV

@@ -1,4 +1,4 @@
-beta0 = beta1 = beta2 = sigmaV = sigmaU = n = sigmaX = rhoY = rhoV = rhoU = mu =loggingLevel= inefficiency=parDef=NULL
+beta0 = beta1 = beta2 = sigmaV = sigmaU = n = sigmaX = rhoY = rhoV = rhoU = mu =loggingLevel= inefficiency=parDef=control=NULL
 
 spfrontier.dgp <- function(){
     if (!is.null(mu)){
@@ -53,6 +53,10 @@ spfrontier.dgp <- function(){
     dat <- data.frame(y,X)
     colnames(dat) <-c('y',paste("X", seq(k), sep = ""))
     tv <- evalFunctionOnParameterDef(parDef,spfrontier.true.value)
+    
+    if (!is.null(control$ignoreWy) && control$ignoreWy) W_y <- NULL
+    if (!is.null(control$ignoreWv) && control$ignoreWv) W_v <- NULL
+    if (!is.null(control$ignoreWu) && control$ignoreWu) W_u <- NULL
     result <- list(formula=formula, data=dat,W_y=W_y,W_v=W_v,W_u=W_u, tv=tv,
                    loggingLevel=loggingLevel,inefficiency=inefficiency)
     return(result)
@@ -88,19 +92,26 @@ spfrontier.estimator <- function(d){
 spfrontier.true.value <- function(){
     tv <- c(beta0, beta1, beta2)
     tvNames <- c("Beta0","Beta1","Beta2")
-    if(!is.null(rhoY)){
-        tv <- c(tv, rhoY)
-        tvNames <- c(tvNames, "rhoY")
+    if (is.null(control$ignoreWy) || !control$ignoreWy){
+        if(!is.null(rhoY)){
+            tv <- c(tv, rhoY)
+            tvNames <- c(tvNames, "rhoY")
+        }
     }
     tv <- c(tv, sigmaV, sigmaU)
     tvNames <- c(tvNames, "SigmaV","SigmaU")
-    if(!is.null(rhoV)){
-        tv <- c(tv, rhoV)
-        tvNames <- c(tvNames, "rhoV")
+    if (is.null(control$ignoreWv) || !control$ignoreWv){
+        if(!is.null(rhoV)){
+            tv <- c(tv, rhoV)
+            tvNames <- c(tvNames, "rhoV")
+        }
     }
-    if(!is.null(rhoU)){
-        tv <- c(tv, rhoU)
-        tvNames <- c(tvNames, "rhoU")
+    
+    if (is.null(control$ignoreWu) || !control$ignoreWu){
+        if(!is.null(rhoU)){
+            tv <- c(tv, rhoU)
+            tvNames <- c(tvNames, "rhoU")
+        }
     }
     if(!is.null(mu)){
         tv <- c(tv, mu)
@@ -124,15 +135,7 @@ spfrontier.true.value <- function(){
 #' 
 #' 
 #' @param runs a number of simulated samples 
-#' @param params a set with parameters to be used in simulation. There are predefined parameter sets:\cr
-#' params000 - a non-spatial stochastic frontier with half-normal inefficiencies\cr
-#' params000T - a non-spatial stochastic frontier with truncated normal inefficiencies\cr
-#' params100 - a stochastic frontier with spatial lags of a dependent variable and with half-normal inefficiencies\cr
-#' params100T - a stochastic frontier with spatial lags of a dependent variable and with truncated normal inefficiencies\cr
-#' params110 -  stochastic frontier with spatial lags of a dependent variable and of a symmetric error component and with half-normal inefficiencies\cr
-#' params111 -  stochastic frontier with spatial lags of a dependent variable, a symmetric error component, and an inefficiency error component and with half-normal inefficiencies\cr
-#' params011 -  stochastic frontier with spatial lags of a symmetric error component and an inefficiency error component and with half-normal inefficiencies\cr
-#' params001 -  stochastic frontier with spatial lags  an inefficiency error component and with half-normal inefficiencies\cr
+#' @param params a set with parameters to be used in simulation.
 #'     
 #' @param autoSave save intermediate results to files. See \code{\link{ezsim}} for details.
 #' @param seed a state for random number generation in R. If NULL (default), the initial state is random. See \code{\link{set.seed}} for details.
@@ -140,38 +143,16 @@ spfrontier.true.value <- function(){
 #' By default set to 'half-normal'. See references for explanations
 #' @param logging an optional level of logging. Possible values are 'quiet','warn','info','debug'. 
 #' By default set to quiet.
+#' @param control an optional list of control parameters for simulation process. Currently the procedure supports:\cr
+#' ignoreWy (TRUE/FALSE) - the spatial contiguity matrix for a dependent variable is not provided to  \code{\link{spfrontier}} estimator (but used in DGP) 
+#' ignoreWv (TRUE/FALSE) - the spatial contiguity matrix for a symmetric error term is not provided to  \code{\link{spfrontier}} estimator (but used in DGP) 
+#' ignoreWu (TRUE/FALSE) - the spatial contiguity matrix for a inefficiency error term is not provided to  \code{\link{spfrontier}} estimator (but used in DGP) 
 #' 
 #' 
 #' @keywords spatial stochastic frontier, simulation
 #' @export
 #' @seealso 
 #' \code{\link{ezsim}}
-#' 
-#' @examples
-#' 
-#' # Define parameter values
-#' # params <- list(n=c(50,100), 
-#' #                  sigmaX=10, 
-#' #                  beta0=1, 
-#' #                  beta1=-2, 
-#' #                  beta2=3, 
-#' #                  sigmaV=0.2, 
-#' #                  sigmaU=0.75)
-#' 
-#' # Run simulations (10 runs)
-#' # res <- ezsimspfrontier(10, 
-#' #                          params = params,  
-#' #                          seed = 99, 
-#' #                          inefficiency = "half-normal",
-#' #                          logging = "quiet")
-#' # 
-#' # Summary of simulation results
-#' # summary(res)
-#' 
-#' # Plot estimates' convergence to true values and estimates' density
-#' #plot(res)
-#' #plot(res, 'density')
-#' 
 #' @rdname simulation
 
 ezsimspfrontier <- function(runs, 
@@ -179,9 +160,10 @@ ezsimspfrontier <- function(runs,
                             params = list(n=c(50,100), sigmaX=10, beta0=1, beta1=-2, beta2=3, sigmaV=0.2, sigmaU=0.75),
                             seed = NULL,
                             inefficiency = "half-normal",
-                            logging = "info"){
+                            logging = "info",
+                            control = list()){
     if (!is.null(seed)) set.seed(seed)
-    parDef <- createParDef(selection = params, banker = list(loggingLevel=logging,inefficiency=inefficiency,parDef=params))
+    parDef <- createParDef(selection = params, banker = list(loggingLevel=logging,inefficiency=inefficiency,control=control,parDef=createParDef(selection = params, banker=list(control=control))))
 
     ezsim_spfrontier<-ezsim(
         m             = runs,
