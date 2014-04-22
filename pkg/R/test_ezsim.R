@@ -1,39 +1,71 @@
-beta0 = beta1 = beta2 = sigmaV = sigmaU = n = sigmaX = rhoY = rhoV = rhoU = mu =loggingLevel= inefficiency=parDef=control=NULL
-
 spfrontier.dgp <- function(){
-    if (!is.null(mu)){
-        if (abs(mu)>sigmaU){
+    
+    .mu <- NULL
+    if (exists("mu")) .mu<-get("mu")
+    .rhoU <- NULL
+    if (exists("rhoU")) .rhoU<-get("rhoU")
+    .rhoV <- NULL
+    if (exists("rhoV")) .rhoV<-get("rhoV")
+    .rhoY <- NULL
+    if (exists("rhoY")) .rhoY<-get("rhoY")
+    .control <- list()
+    if (exists("control")) .control<-get("control")
+    .beta1 <- NULL
+    if (exists("beta1")) .beta1<-get("beta1")
+    .beta0 <- NULL
+    if (exists("beta0")) .beta0<-get("beta0")
+    .beta2 <- NULL
+    if (exists("beta2")) .beta2<-get("beta2")
+    .sigmaU <- NULL
+    if (exists("sigmaU")) .sigmaU<-get("sigmaU")
+    .sigmaX <- NULL
+    if (exists("sigmaX")) .sigmaX<-get("sigmaX")
+    .sigmaV <- NULL
+    if (exists("sigmaV")) .sigmaV<-get("sigmaV")
+    .parDef <- NULL
+    if (exists("parDef")) .parDef<-get("parDef")
+    .loggingLevel <- NULL
+    if (exists("loggingLevel")) .loggingLevel<-get("loggingLevel")
+    .inefficiency <- NULL
+    if (exists("inefficiency")) .inefficiency<-get("inefficiency")
+    .n <- NULL
+    if (exists("n")) .n<-get("n")
+    
+    if (!is.null(.mu)){
+        if (abs(.mu)>.sigmaU){
             cat("DGP: Truncated normal mean (mu) is higher than standard deviation, which can lead to non-skewed residuals")
         }
     }
     
     formula <- as.formula("y ~ X1 + X2")
-    beta<-c(beta1,beta2)
+    beta<-c(.beta1,.beta2)
     k <- length(beta)
-    X <- matrix(rnorm(n*k,0,sigmaX),n, k)
+    X <- matrix(rnorm(.n*k,0,.sigmaX),.n, k)
+    
     
     W_v <- NULL
-    SpW2 <- diag(n)
-    if (!is.null(rhoV)){
-        W_v <- genW(n,type="rook")
-        SpW2 <- solve(diag(n)-rhoV*W_v)
+    SpW2 <- diag(.n)
+    if (!is.null(.rhoV)){
+        W_v <- genW(.n,type="rook")
+        SpW2 <- solve(diag(.n)-.rhoV*W_v)
     }
-    v <-  SpW2%*%rmvnorm(1,mean = rep(0, n),sigma = sigmaV^2*diag(n))[1,]
-    if (!is.null(rhoV)){
+    v <-  SpW2%*%rmvnorm(1,mean = rep(0, .n),sigma = .sigmaV^2*diag(.n))[1,]
+    if (!is.null(.rhoV)){
         print(coef(lm(v~Wv-1, data=data.frame(v, Wv = W_v%*%v))))
     }
     
     W_u <- NULL
     muval <- 0
-    if (!is.null(mu))
-        muval <- mu
-    SpW3 <- diag(n)
-    if (!is.null(rhoU)){
-        W_u <- genW(n,type="queen")
-        SpW3 <- solve(diag(n)-rhoU*W_u)
+    
+    if (!is.null(.mu))
+        muval <- .mu
+    SpW3 <- diag(.n)
+    if (!is.null(.rhoU)){
+        W_u <- genW(.n,type="queen")
+        SpW3 <- solve(diag(.n)-.rhoU*W_u)
     }
-    u <- SpW3%*%rtmvnorm(1,mean = rep(muval, n),sigma = sigmaU^2*diag(n),algorithm="gibbs", lower=rep(0, n))[1,]
-    if (!is.null(rhoU)){
+    u <- SpW3%*%rtmvnorm(1,mean = rep(muval, .n),sigma = .sigmaU^2*diag(.n),algorithm="gibbs", lower=rep(0, .n))[1,]
+    if (!is.null(.rhoU)){
         print(coef(lm(u~Wu-1, data=data.frame(u, Wu = W_u%*%u))))
     }
     sk <- skewness(v-u)
@@ -42,23 +74,23 @@ spfrontier.dgp <- function(){
     }
     
     #plot(density(v - u))
-    y <- beta0 + X %*% beta + v - u
+    y <- .beta0 + X %*% beta + v - u
     
     W_y <- NULL
-    if (!is.null(rhoY)){
-        W_y <- genW(n,type="queen")
-        SpW <- solve(diag(n)-rhoY*W_y)
+    if (!is.null(.rhoY)){
+        W_y <- genW(.n,type="queen")
+        SpW <- solve(diag(.n)-.rhoY*W_y)
         y <- SpW%*%y
     }
     dat <- data.frame(y,X)
     colnames(dat) <-c('y',paste("X", seq(k), sep = ""))
-    tv <- evalFunctionOnParameterDef(parDef,spfrontier.true.value)
+    tv <- evalFunctionOnParameterDef(.parDef,spfrontier.true.value)
     
-    if (!is.null(control$ignoreWy) && control$ignoreWy) W_y <- NULL
-    if (!is.null(control$ignoreWv) && control$ignoreWv) W_v <- NULL
-    if (!is.null(control$ignoreWu) && control$ignoreWu) W_u <- NULL
+    if (!is.null(.control$ignoreWy) && .control$ignoreWy) W_y <- NULL
+    if (!is.null(.control$ignoreWv) && .control$ignoreWv) W_v <- NULL
+    if (!is.null(.control$ignoreWu) && .control$ignoreWu) W_u <- NULL
     result <- list(formula=formula, data=dat,W_y=W_y,W_v=W_v,W_u=W_u, tv=tv,
-                   loggingLevel=loggingLevel,inefficiency=inefficiency)
+                   loggingLevel=.loggingLevel,inefficiency=.inefficiency)
     return(result)
 }
 
@@ -90,31 +122,62 @@ spfrontier.estimator <- function(d){
 #' @rdname simulation
 
 spfrontier.true.value <- function(){
-    tv <- c(beta0, beta1, beta2)
+    .mu <- NULL
+    if (exists("mu")) .mu<-get("mu")
+    .rhoU <- NULL
+    if (exists("rhoU")) .rhoU<-get("rhoU")
+    .rhoV <- NULL
+    if (exists("rhoV")) .rhoV<-get("rhoV")
+    .rhoY <- NULL
+    if (exists("rhoY")) .rhoY<-get("rhoY")
+    .control <- list()
+    if (exists("control")) .control<-get("control")
+    .beta1 <- NULL
+    if (exists("beta1")) .beta1<-get("beta1")
+    .beta0 <- NULL
+    if (exists("beta0")) .beta0<-get("beta0")
+    .beta2 <- NULL
+    if (exists("beta2")) .beta2<-get("beta2")
+    .sigmaU <- NULL
+    if (exists("sigmaU")) .sigmaU<-get("sigmaU")
+    .sigmaX <- NULL
+    if (exists("sigmaX")) .sigmaX<-get("sigmaX")
+    .sigmaV <- NULL
+    if (exists("sigmaV")) .sigmaV<-get("sigmaV")
+    .parDef <- NULL
+    if (exists("parDef")) .parDef<-get("parDef")
+    .loggingLevel <- NULL
+    if (exists("loggingLevel")) .loggingLevel<-get("loggingLevel")
+    .inefficiency <- NULL
+    if (exists("inefficiency")) .inefficiency<-get("inefficiency")
+    .n <- NULL
+    if (exists("n")) .n<-get("n")
+    
+    tv <- c(.beta0, .beta1, .beta2)
     tvNames <- c("Beta0","Beta1","Beta2")
-    if (is.null(control$ignoreWy) || !control$ignoreWy){
-        if(!is.null(rhoY)){
-            tv <- c(tv, rhoY)
+    if (is.null(.control$ignoreWy) || !.control$ignoreWy){
+        if(!is.null(.rhoY)){
+            tv <- c(tv, .rhoY)
             tvNames <- c(tvNames, "rhoY")
         }
     }
-    tv <- c(tv, sigmaV, sigmaU)
+    tv <- c(tv, .sigmaV, .sigmaU)
     tvNames <- c(tvNames, "SigmaV","SigmaU")
-    if (is.null(control$ignoreWv) || !control$ignoreWv){
-        if(!is.null(rhoV)){
-            tv <- c(tv, rhoV)
+    if (is.null(.control$ignoreWv) || !.control$ignoreWv){
+        if(!is.null(.rhoV)){
+            tv <- c(tv, .rhoV)
             tvNames <- c(tvNames, "rhoV")
         }
     }
     
-    if (is.null(control$ignoreWu) || !control$ignoreWu){
-        if(!is.null(rhoU)){
-            tv <- c(tv, rhoU)
+    if (is.null(.control$ignoreWu) || !.control$ignoreWu){
+        if(!is.null(.rhoU)){
+            tv <- c(tv, .rhoU)
             tvNames <- c(tvNames, "rhoU")
         }
     }
-    if(!is.null(mu)){
-        tv <- c(tv, mu)
+    if(!is.null(.mu)){
+        tv <- c(tv, .mu)
         tvNames <- c(tvNames, "mu")
     }
     names(tv) <- tvNames
@@ -154,6 +217,17 @@ spfrontier.true.value <- function(){
 #' @seealso 
 #' \code{\link{ezsim}}
 #' @rdname simulation
+#' 
+#' @examples
+#' params000 <- list(n=c(50, 100),
+#'                  sigmaX=10, 
+#'                  beta0=1,
+#'                  beta1=-2,
+#'                  beta2=3, 
+#'                  sigmaV=0.2, 
+#'                  sigmaU=0.75)
+#' res000 <- ezsimspfrontier(5, params = params000,  seed = 999, inefficiency = "half-normal",logging = "info")
+#' summary(res000)
 
 ezsimspfrontier <- function(runs, 
                             autoSave = 0, 

@@ -62,6 +62,17 @@ of the \code{spfrontier} estimator on a simulated data set,
 generated on the base of provided parameters. The resulting
 estimates can be analysed for biasedness, efficiency, etc.
 }
+\examples{
+params000 <- list(n=c(50, 100),
+                 sigmaX=10,
+                 beta0=1,
+                 beta1=-2,
+                 beta2=3,
+                 sigmaV=0.2,
+                 sigmaU=0.75)
+res000 <- ezsimspfrontier(5, params = params000,  seed = 999, inefficiency = "half-normal",logging = "info")
+summary(res000)
+}
 \seealso{
 \code{\link{ezsim}}
 }
