@@ -19,6 +19,5 @@ logging <- function(message, obj = NULL, level = "debug", caller = sys.call(-1))
                         print(obj)
                 }
                 flush.console()
-                Sys.sleep(0.1)
         }
 }

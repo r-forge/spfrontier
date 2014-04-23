@@ -1,5 +1,5 @@
 spfrontier.dgp <- function(){
-    
+    cat("")
     .mu <- NULL
     if (exists("mu")) .mu<-get("mu")
     .rhoU <- NULL
@@ -95,6 +95,7 @@ spfrontier.dgp <- function(){
 }
 
 spfrontier.estimator <- function(d){
+    message("Start------------------------->")
     modelEstimates <- spfrontier(d$formula,d$data,W_y=d$W_y,W_v=d$W_v,W_u=d$W_u,
                                  logging = d$loggingLevel,inefficiency=d$inefficiency,onlyCoef=T,
                                  control=list())
@@ -107,6 +108,8 @@ spfrontier.estimator <- function(d){
         out <- c(coef$beta,coef$rhoY, coef$sigmaV, coef$sigmaU, coef$rhoV, coef$rhoU, coef$mu)
         
     }
+    message("<-------------------------End")
+    Sys.sleep(0.1)
     return(out)
 }
 

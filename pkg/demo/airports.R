@@ -1,6 +1,5 @@
-
-#library(spdep)
-#library(car)
+library(spdep)
+library(car)
 
 rm(list=ls())
 data(airports, envir = environment())
