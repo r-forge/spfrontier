@@ -50,11 +50,12 @@
 #' plot(density(stats::residuals(ols)))
 #' skewness(stats::residuals(ols))
 #' 
-#' model <- spfrontier(formula , data=airports2011)
-#' summary(model )
+#' # Takes >5 sec, see demo for more examples
+#' # model <- spfrontier(formula , data=airports2011)
+#' # summary(model )
 #' 
-#' model <- spfrontier(formula , data=airports2011, W_y=W)
-#' summary(model )
+#' # model <- spfrontier(formula , data=airports2011, W_y=W)
+#' # summary(model )
 #' 
 spfrontier <- function(formula, data,
                        W_y = NULL, W_v = NULL,W_u = NULL,

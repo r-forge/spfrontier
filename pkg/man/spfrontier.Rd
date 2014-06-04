@@ -69,11 +69,12 @@ summary(ols )
 plot(density(stats::residuals(ols)))
 skewness(stats::residuals(ols))
 
-model <- spfrontier(formula , data=airports2011)
-summary(model )
+# Takes >5 sec, see demo for more examples
+# model <- spfrontier(formula , data=airports2011)
+# summary(model )
 
-model <- spfrontier(formula , data=airports2011, W_y=W)
-summary(model )
+# model <- spfrontier(formula , data=airports2011, W_y=W)
+# summary(model )
 }
 \references{
 Kumbhakar, S.C. and Lovell, C.A.K (2000), Stochastic

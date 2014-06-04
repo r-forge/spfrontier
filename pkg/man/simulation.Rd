@@ -70,7 +70,11 @@ params000 <- list(n=c(50, 100),
                  beta2=3,
                  sigmaV=0.2,
                  sigmaU=0.75)
-res000 <- ezsimspfrontier(5, params = params000,  seed = 999, inefficiency = "half-normal",logging = "info")
+res000 <- ezsimspfrontier(2,
+     params = params000,
+     seed = 999,
+     inefficiency = "half-normal",
+     logging = "info")
 summary(res000)
 }
 \seealso{
