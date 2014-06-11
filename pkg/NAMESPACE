@@ -14,6 +14,7 @@ importFrom("Matrix", nearPD)
 #
 
 export(spfrontier)
+export(logLikelihood)
 export(ezsimspfrontier,spfrontier.true.value)
 export(genW, rowStdrt,constructW)
 

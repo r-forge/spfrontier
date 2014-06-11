@@ -79,6 +79,7 @@ funcLogL <- function(parameters, quiet = F){
                 
                 #logging("3:",r)
             }else{
+                r <- r - n*log(2*pi)/2
                 r <- r - n*log(pnorm(mu/sigmaU))
                 r <- r + n * log(p$nu) 
                 r <- r - 0.5 * p$nu^2*sum((e + vMu)^2)
@@ -174,4 +175,60 @@ funcGradient<-function(parameters){
         names(grad) <- c(ns, "dMu")
     }
     return(-grad)
+}
+
+#' @title Calculation of the log likelihood function for the spatial stochastic frontier model
+#'
+#' @description
+#' \code{logLikelihood} returns a value of the log likelihood function 
+#' for the spatial stochastic frontier model
+#' 
+#' @details
+#' This function is exported from the package for testing and presentation purposes
+#' A list of arguments of the function exactly matches the corresponding list of the \code{\link{spfrontier}} function
+#' 
+#' 
+#' @param formula an object of class "\code{\link{formula}}"
+#' @param data data frame, containing the variables in the model
+#' @param W_y a spatial weight matrix for spatial lag of the dependent variable
+#' @param W_v a spatial weight matrix for spatial lag of the symmetric error term
+#' @param W_u a spatial weight matrix for spatial lag of the inefficiency error term
+#' @param values a  vector of log likelihood function parameters
+#' @param logging an optional level of logging. Possible values are 'quiet','warn','info','debug'. 
+#' By default set to quiet.
+#' @param inefficiency sets the distribution for inefficiency error component. Possible values are 'half-normal' (for half-normal distribution) and 'truncated' (for truncated normal distribution). 
+#' By default set to 'half-normal'.
+
+#' 
+#' @export
+logLikelihood <- function(formula, data,
+                       W_y = NULL, W_v = NULL,W_u = NULL,
+                       inefficiency = "half-normal",
+                       values,
+                       logging = c("quiet", "info", "debug")){
+    logging <- match.arg(logging)
+    con <- list(grid.beta0 = 1, grid.sigmaV = 1, grid.sigmaU = 1, grid.rhoY = 1, grid.rhoU = 10, grid.rhoV = 10, grid.mu = 1)
+    
+    initEnvir(W_y=W_y, W_v=W_v,W_u=W_u,inefficiency=inefficiency, logging=logging)
+    logging("Estimator started", level="info")
+
+    mf <- model.frame(formula, data)
+    y <- as.matrix(model.response(mf))
+    X <- as.matrix(mf[-1])
+    tm <- attr(mf, "terms")
+    intercept <- attr(tm, "intercept") == 1
+    if (intercept){
+        X <- cbind(Intercept=1L,X)
+    }
+    k <- ncol(X)
+    n <- length(y)
+    envirAssign("X", X)
+    envirAssign("y", y)
+    isSpY <- !is.null(W_y)
+    isSpV <- !is.null(W_v)
+    isSpU <- !is.null(W_u)
+    isTN <- (inefficiency == "truncated")
+    res <- funcLogL(paramsToVector(olsenReparam(paramsFromVector(values, k, isSpY, isSpV, isSpU, isTN, olsen=F))))
+    names(res)<-"Log-likelihood function"
+    return(-res)
 }
