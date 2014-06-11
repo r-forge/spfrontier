@@ -94,8 +94,8 @@ spfrontier.dgp <- function(){
     return(result)
 }
 
-spfrontier.estimator <- function(d){
-    message("Start------------------------->")
+spfrontier.estimator <- function(d){    
+    message(paste("Start[n=",nrow(d$data),"]------------------------->"))
     modelEstimates <- spfrontier(d$formula,d$data,W_y=d$W_y,W_v=d$W_v,W_u=d$W_u,
                                  logging = d$loggingLevel,inefficiency=d$inefficiency,onlyCoef=T,
                                  control=list())
@@ -157,7 +157,7 @@ spfrontier.true.value <- function(){
     if (exists("n")) .n<-get("n")
     
     tv <- c(.beta0, .beta1, .beta2)
-    tvNames <- c("Beta0","Beta1","Beta2")
+    tvNames <- c("beta0","beta1","beta2")
     if (is.null(.control$ignoreWy) || !.control$ignoreWy){
         if(!is.null(.rhoY)){
             tv <- c(tv, .rhoY)
@@ -165,7 +165,7 @@ spfrontier.true.value <- function(){
         }
     }
     tv <- c(tv, .sigmaV, .sigmaU)
-    tvNames <- c(tvNames, "SigmaV","SigmaU")
+    tvNames <- c(tvNames, "sigmaV","sigmaU")
     if (is.null(.control$ignoreWv) || !.control$ignoreWv){
         if(!is.null(.rhoV)){
             tv <- c(tv, .rhoV)
@@ -250,6 +250,7 @@ ezsimspfrontier <- function(runs,
         m             = runs,
         run           = TRUE,
         parameter_def = parDef,
+        display_name = c(Intercept='beta[0]',X1='beta[1]',X2='beta[2]',beta0='beta[0]',beta1='beta[1]',beta2='beta[2]',sigmaV='sigma[v]',sigmaU='sigma[u]',sigmaX='sigma[X]',rhoV='rho[v]',rhoU='rho[u]',rhoY='rho[Y]',mu='mu'),
         dgp           = spfrontier.dgp,
         estimator     = spfrontier.estimator,
         true_value    = spfrontier.true.value,

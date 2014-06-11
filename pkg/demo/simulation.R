@@ -35,11 +35,13 @@ params001 <- params011
 params001$rhoV <- NULL
 
 res000 <- ezsimspfrontier(100, params = params000,  seed = 999, inefficiency = "half-normal",logging = "info")
+res000T <- ezsimspfrontier(100, params = params000T, seed = 999, inefficiency = "truncated",logging = "info")
+
 res100 <- ezsimspfrontier(100, params = params100,  seed = 999, inefficiency = "half-normal",logging = "info")
 res100_bias <- ezsimspfrontier(100, params = params100,  seed = 999, inefficiency = "half-normal",logging = "info", control=list(ignoreWy=T))
-res000T <- ezsimspfrontier(100, params = params000T, seed = 999, inefficiency = "truncated",logging = "info")
+
 res100T <- ezsimspfrontier(100, params = params100T, seed = 999, inefficiency = "truncated",logging = "info")
-summary(res100T)
+
 
 
 #All tests above work as appropriate
@@ -51,3 +53,11 @@ summary(res100T)
 #res <- ezsimspfrontier(10, params = params101, seed = 999, inefficiency = "half-normal",logging = "info")
 #res <- ezsimspfrontier(10, params = params011, seed = 999, inefficiency = "half-normal",logging = "info")
 #res <- ezsimspfrontier(10, params = params111, seed = 999, inefficiency = "half-normal",logging = "info")
+
+res <- res000T
+
+summary(res)
+ps <- plot(res, parameters_priority = c("beta0","beta1","beta2","sigmaV","sigmaU","mu","rhoY","rhoV","rhoU"), return_print =T)
+do.call(grid.arrange,  ps)
+ps <- plot(res, type="density",parameters_priority = c("beta0","beta1","beta2","sigmaV","sigmaU","mu","rhoY","rhoV","rhoU"), return_print =T)
+do.call(grid.arrange,  ps)
