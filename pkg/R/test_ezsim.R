@@ -86,6 +86,10 @@ spfrontier.dgp <- function(){
     colnames(dat) <-c('y',paste("X", seq(k), sep = ""))
     tv <- evalFunctionOnParameterDef(.parDef,spfrontier.true.value)
     
+    if (!is.null(.control$replaceWyWv) && .control$replaceWyWv) W_y <- W_v
+    if (!is.null(.control$replaceWyWu) && .control$replaceWyWu) W_y <- W_u
+    if (!is.null(.control$replaceWvWu) && .control$replaceWvWu) W_v <- W_u
+    
     if (!is.null(.control$ignoreWy) && .control$ignoreWy) W_y <- NULL
     if (!is.null(.control$ignoreWv) && .control$ignoreWv) W_v <- NULL
     if (!is.null(.control$ignoreWu) && .control$ignoreWu) W_u <- NULL
@@ -94,8 +98,15 @@ spfrontier.dgp <- function(){
     return(result)
 }
 
-spfrontier.estimator <- function(d){    
-    message(paste("Start[n=",nrow(d$data),"]------------------------->"))
+spfrontier.estimator <- function(d){
+    run <- 0 
+    n <- nrow(d$data)
+    nam <- paste(".run",n)
+    if (exists(nam, envir=.spfrontierEnv)) run<-get(nam, envir=.spfrontierEnv)
+    run <- run + 1
+    assign(nam, run, envir=.spfrontierEnv)
+    
+    message(paste("Start[n =",n,", run =",run,"]------------------------->"))
     modelEstimates <- spfrontier(d$formula,d$data,W_y=d$W_y,W_v=d$W_v,W_u=d$W_u,
                                  logging = d$loggingLevel,inefficiency=d$inefficiency,onlyCoef=T,
                                  control=list())
@@ -243,6 +254,7 @@ ezsimspfrontier <- function(runs,
                             inefficiency = "half-normal",
                             logging = "info",
                             control = list()){
+    rm(list = ls(envir=.spfrontierEnv), envir=.spfrontierEnv)
     if (!is.null(seed)) set.seed(seed)
     parDef <- createParDef(selection = params, banker = list(loggingLevel=logging,inefficiency=inefficiency,control=control,parDef=createParDef(selection = params, banker=list(control=control))))
 

@@ -42,22 +42,33 @@ res100_bias <- ezsimspfrontier(100, params = params100,  seed = 999, inefficienc
 
 res100T <- ezsimspfrontier(100, params = params100T, seed = 999, inefficiency = "truncated",logging = "info")
 
+params001A <- params001
+params001A$rhoY <- 0
+res001A <- ezsimspfrontier(100, params = params001A,  seed = 999, inefficiency = "half-normal",logging = "info", control=list(ignoreWu=T,replaceWyWu=T))
+
+params010A <- params010
+params010A$rhoY <- 0
+res010A <- ezsimspfrontier(100, params = params010A,  seed = 999, inefficiency = "half-normal",logging = "info", control=list(ignoreWv=T,replaceWyWv=T))
+
+
 
 
 #All tests above work as appropriate
 
 #res <- ezsimspfrontier(10, params = params010, seed = 999, inefficiency = "half-normal",logging = "debug")
 #A problem with sigmaV
-#res <- ezsimspfrontier(10, params = params001, seed = 999, inefficiency = "half-normal",logging = "info")
+#res001 <- ezsimspfrontier(100, params = params001, seed = 999, inefficiency = "half-normal",logging = "info")
 #res <- ezsimspfrontier(10, params = params110, seed = 999, inefficiency = "half-normal",logging = "info")
 #res <- ezsimspfrontier(10, params = params101, seed = 999, inefficiency = "half-normal",logging = "info")
 #res <- ezsimspfrontier(10, params = params011, seed = 999, inefficiency = "half-normal",logging = "info")
 #res <- ezsimspfrontier(10, params = params111, seed = 999, inefficiency = "half-normal",logging = "info")
 
-res <- res000T
+res <- res100_bias
 
 summary(res)
+#subset=list(estimator=c("Intercept","X1","rhoY","sigmaV","sigmaU","mu")),
 ps <- plot(res, parameters_priority = c("beta0","beta1","beta2","sigmaV","sigmaU","mu","rhoY","rhoV","rhoU"), return_print =T)
 do.call(grid.arrange,  ps)
-ps <- plot(res, type="density",parameters_priority = c("beta0","beta1","beta2","sigmaV","sigmaU","mu","rhoY","rhoV","rhoU"), return_print =T)
+ps <- plot(res, type="density",parameters_priority = c("Intercept","X1","X2","rhoY","sigmaV","sigmaU","mu","rhoV","rhoU"), return_print =T)
 do.call(grid.arrange,  ps)
+
