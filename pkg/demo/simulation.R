@@ -20,7 +20,7 @@ params110 <- params100
 params110$rhoV <- 0.3
 
 params101 <- params100
-params110$rhoU <- 0.5
+params101$rhoU <- 0.5
 
 params010 <- params110
 params010$rhoY <- NULL
@@ -63,7 +63,7 @@ res010A <- ezsimspfrontier(100, params = params010A,  seed = 999, inefficiency =
 #res <- ezsimspfrontier(10, params = params011, seed = 999, inefficiency = "half-normal",logging = "info")
 #res <- ezsimspfrontier(10, params = params111, seed = 999, inefficiency = "half-normal",logging = "info")
 
-res <- res100_bias
+res <- res001A
 
 summary(res)
 #subset=list(estimator=c("Intercept","X1","rhoY","sigmaV","sigmaU","mu")),
