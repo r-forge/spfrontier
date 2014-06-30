@@ -43,7 +43,7 @@
 #' data( airports )
 #' airports2011 <- subset(airports, Year==2011)
 #' W <- constructW(cbind(airports2011$longitude, airports2011$latitude),airports2011$ICAO)
-#' formula <- log(PAX) ~ log(Population100km) + log(Routes) + log(GDPpc) +Island
+#' formula <- log(PAX) ~ log(Population100km) + log(Routes) + log(GDPpc)
 #
 #' ols <- lm(formula , data=airports2011)
 #' summary(ols )

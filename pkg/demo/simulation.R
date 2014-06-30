@@ -53,21 +53,7 @@ save(res010A, file="res010A.rData")
 
 #All tests above work as appropriate
 
-res010 <- ezsimspfrontier(100, params = params010, inefficiency = "half-normal",logging = "debug",control=ctrl)
-#A problem with sigmaV
-res001 <- ezsimspfrontier(100, params = params001, inefficiency = "half-normal",logging = "debug",control=ctrl)
+res010 <- ezsimspfrontier(100, params = params010, inefficiency = "half-normal",logging = "info",control=ctrl)
+res001 <- ezsimspfrontier(100, params = params001, inefficiency = "half-normal",logging = "info",control=ctrl)
 res101 <- ezsimspfrontier(100, params = params101, inefficiency = "half-normal",logging = "info",control=ctrl)
-
-#res001 <- ezsimspfrontier(100, params = params001, seed = 999, inefficiency = "half-normal",logging = "info")
-#res <- ezsimspfrontier(10, params = params110, seed = 999, inefficiency = "half-normal",logging = "info")
-#res <- ezsimspfrontier(10, params = params101, seed = 999, inefficiency = "half-normal",logging = "info")
-#res <- ezsimspfrontier(10, params = params011, seed = 999, inefficiency = "half-normal",logging = "info")
-#res <- ezsimspfrontier(10, params = params111, seed = 999, inefficiency = "half-normal",logging = "info")
-
-res <- res001A
-summary(res)
-#sub = subset=list(estimator=c("Intercept","X1","rhoY","sigmaV","sigmaU","mu")),
-ps <- plot(res, parameters_priority = c("beta0","beta1","beta2","sigmaV","sigmaU","mu","rhoY","rhoV","rhoU"), return_print =T)
-do.call(grid.arrange,  c(ps, list(nrow=3,ncol=2)))
-ps <- plot(res, type="density",parameters_priority = c("Intercept","X1","X2","rhoY","sigmaV","sigmaU","mu","rhoV","rhoU"), return_print =T)
-do.call(grid.arrange,  c(ps, list(nrow=3,ncol=2)))
+res111 <- ezsimspfrontier(100, params = params111, inefficiency = "half-normal",logging = "info",control=ctrl)
