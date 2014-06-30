@@ -1,32 +1,20 @@
 params000 <- list(n=c(100,200,300),
-                  sigmaX=10, 
-                  beta0=1,
-                  beta1=-2,
-                  beta2=3, 
-                  sigmaV=0.2, 
-                  sigmaU=1)
+                  beta0=5,
+                  beta1=10,
+                  beta2=1,
+                  sigmaV=0.5, 
+                  sigmaU=2.5)
 
-params000T <- params000
-params000T$mu <- 0.4
+params000T <- c(params000, list(mu=1))
+params100 <- c(params000, list(rhoY=0.2))
+params100T <- c(params000T, list(rhoY=0.2))
 
-params100 <- params000
-params100$rhoY <- 0.2
-
-params100T <- params000T
-params100T$rhoY <- 0.2
-
-
-params110 <- params100
-params110$rhoV <- 0.3
-
-params101 <- params100
-params101$rhoU <- 0.5
+params110 <- c(params100, list(rhoV=0.2))
+params101 <- c(params100, list(rhoU=0.2))
+params111 <- c(params110, list(rhoU=0.2))
 
 params010 <- params110
 params010$rhoY <- NULL
-
-params111 <- params110
-params111$rhoU <- 0.5
 
 params011 <- params111
 params011$rhoY <- NULL
@@ -34,29 +22,42 @@ params011$rhoY <- NULL
 params001 <- params011
 params001$rhoV <- NULL
 
-res000 <- ezsimspfrontier(100, params = params000,  seed = 999, inefficiency = "half-normal",logging = "info")
-res000T <- ezsimspfrontier(100, params = params000T, seed = 999, inefficiency = "truncated",logging = "info")
+ctrl <- list(true.initial=F, seed=999, cores=detectCores())
+res000 <- ezsimspfrontier(100, params = params000,  inefficiency = "half-normal",logging = "info", control=ctrl)
+save(res000, file="res000.rData")
 
-res100 <- ezsimspfrontier(100, params = params100,  seed = 999, inefficiency = "half-normal",logging = "info")
-res100_bias <- ezsimspfrontier(100, params = params100,  seed = 999, inefficiency = "half-normal",logging = "info", control=list(ignoreWy=T))
+res000T <- ezsimspfrontier(100, params = params000T, inefficiency = "truncated",logging = "info", control=ctrl)
+save(res000T, file="res000T.rData")
 
-res100T <- ezsimspfrontier(100, params = params100T, seed = 999, inefficiency = "truncated",logging = "info")
+res100 <- ezsimspfrontier(100, params = params100,  inefficiency = "half-normal",logging = "info", control=ctrl)
+save(res100, file="res100.rData")
 
-params001A <- params001
-params001A$rhoY <- 0
-res001A <- ezsimspfrontier(100, params = params001A,  seed = 999, inefficiency = "half-normal",logging = "info", control=list(ignoreWu=T,replaceWyWu=T))
+res100A <- ezsimspfrontier(100, params = params100,  inefficiency = "half-normal",logging = "info", 
+                               control=c(ctrl,list(ignoreWy=T)))
+save(res100A, file="res100A.rData")
 
-params010A <- params010
-params010A$rhoY <- 0
-res010A <- ezsimspfrontier(100, params = params010A,  seed = 999, inefficiency = "half-normal",logging = "info", control=list(ignoreWv=T,replaceWyWv=T))
+res100T <- ezsimspfrontier(100, params = params100T, inefficiency = "truncated",logging = "info", control=ctrl)
+save(res100T, file="res100T.rData")
 
+params001A <- c(params001, list(rhoY=0))
+res001A <- ezsimspfrontier(100, params = params001A, inefficiency = "half-normal",logging = "info", 
+                           control=c(ctrl,list(ignoreWu=T,replaceWyWu=T)))
+save(res001A, file="res001A.rData")
+
+params010A <- c(params010, list(rhoY=0))
+res010A <- ezsimspfrontier(100, params = params010A, inefficiency = "half-normal",logging = "info", 
+                           control=c(ctrl,list(ignoreWv=T,replaceWyWv=T)))
+save(res010A, file="res010A.rData")
 
 
 
 #All tests above work as appropriate
 
-#res <- ezsimspfrontier(10, params = params010, seed = 999, inefficiency = "half-normal",logging = "debug")
+res010 <- ezsimspfrontier(100, params = params010, inefficiency = "half-normal",logging = "debug",control=ctrl)
 #A problem with sigmaV
+res001 <- ezsimspfrontier(100, params = params001, inefficiency = "half-normal",logging = "debug",control=ctrl)
+res101 <- ezsimspfrontier(100, params = params101, inefficiency = "half-normal",logging = "info",control=ctrl)
+
 #res001 <- ezsimspfrontier(100, params = params001, seed = 999, inefficiency = "half-normal",logging = "info")
 #res <- ezsimspfrontier(10, params = params110, seed = 999, inefficiency = "half-normal",logging = "info")
 #res <- ezsimspfrontier(10, params = params101, seed = 999, inefficiency = "half-normal",logging = "info")
@@ -64,11 +65,9 @@ res010A <- ezsimspfrontier(100, params = params010A,  seed = 999, inefficiency =
 #res <- ezsimspfrontier(10, params = params111, seed = 999, inefficiency = "half-normal",logging = "info")
 
 res <- res001A
-
 summary(res)
-#subset=list(estimator=c("Intercept","X1","rhoY","sigmaV","sigmaU","mu")),
+#sub = subset=list(estimator=c("Intercept","X1","rhoY","sigmaV","sigmaU","mu")),
 ps <- plot(res, parameters_priority = c("beta0","beta1","beta2","sigmaV","sigmaU","mu","rhoY","rhoV","rhoU"), return_print =T)
-do.call(grid.arrange,  ps)
+do.call(grid.arrange,  c(ps, list(nrow=3,ncol=2)))
 ps <- plot(res, type="density",parameters_priority = c("Intercept","X1","X2","rhoY","sigmaV","sigmaU","mu","rhoV","rhoU"), return_print =T)
-do.call(grid.arrange,  ps)
-
+do.call(grid.arrange,  c(ps, list(nrow=3,ncol=2)))

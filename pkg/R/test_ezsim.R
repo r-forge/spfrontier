@@ -1,4 +1,8 @@
 spfrontier.dgp <- function(){
+    require(mvtnorm)
+    require(spfrontier)
+    require(moments)
+    require(tmvtnorm)
     cat("")
     .mu <- NULL
     if (exists("mu")) .mu<-get("mu")
@@ -18,8 +22,6 @@ spfrontier.dgp <- function(){
     if (exists("beta2")) .beta2<-get("beta2")
     .sigmaU <- NULL
     if (exists("sigmaU")) .sigmaU<-get("sigmaU")
-    .sigmaX <- NULL
-    if (exists("sigmaX")) .sigmaX<-get("sigmaX")
     .sigmaV <- NULL
     if (exists("sigmaV")) .sigmaV<-get("sigmaV")
     .parDef <- NULL
@@ -40,19 +42,21 @@ spfrontier.dgp <- function(){
     formula <- as.formula("y ~ X1 + X2")
     beta<-c(.beta1,.beta2)
     k <- length(beta)
-    X <- matrix(rnorm(.n*k,0,.sigmaX),.n, k)
+    x <- runif(.n, 1,10)
+    X <- cbind(log(x), log(x)^2)
+    #X <- matrix(rnorm(.n*k,0,.sigmaX),.n, k)
     
     
     W_v <- NULL
     SpW2 <- diag(.n)
     if (!is.null(.rhoV)){
-        W_v <- genW(.n,type="rook")
+        W_v <- rowStdrt(genW(.n,type="rook"))
         SpW2 <- solve(diag(.n)-.rhoV*W_v)
     }
     v <-  SpW2%*%rmvnorm(1,mean = rep(0, .n),sigma = .sigmaV^2*diag(.n))[1,]
-    if (!is.null(.rhoV)){
-        print(coef(lm(v~Wv-1, data=data.frame(v, Wv = W_v%*%v))))
-    }
+    #if (!is.null(.rhoV)){
+    #    print(coef(lm(v~Wv-1, data=data.frame(v, Wv = W_v%*%v))))
+    #}
     
     W_u <- NULL
     muval <- 0
@@ -61,13 +65,13 @@ spfrontier.dgp <- function(){
         muval <- .mu
     SpW3 <- diag(.n)
     if (!is.null(.rhoU)){
-        W_u <- genW(.n,type="queen")
+        W_u <- rowStdrt(genW(.n,type="queen"))
         SpW3 <- solve(diag(.n)-.rhoU*W_u)
     }
     u <- SpW3%*%rtmvnorm(1,mean = rep(muval, .n),sigma = .sigmaU^2*diag(.n),algorithm="gibbs", lower=rep(0, .n))[1,]
-    if (!is.null(.rhoU)){
-        print(coef(lm(u~Wu-1, data=data.frame(u, Wu = W_u%*%u))))
-    }
+    #if (!is.null(.rhoU)){
+    #   print(coef(lm(u~Wu-1, data=data.frame(u, Wu = W_u%*%u))))
+    #}
     sk <- skewness(v-u)
     if (sk>=0){
         cat("DGP: Skewness of generated residuals is non-negative = ",sk)
@@ -78,14 +82,17 @@ spfrontier.dgp <- function(){
     
     W_y <- NULL
     if (!is.null(.rhoY)){
-        W_y <- genW(.n,type="queen")
+        W_y <- rowStdrt(genW(.n,type="queen"))
         SpW <- solve(diag(.n)-.rhoY*W_y)
         y <- SpW%*%y
     }
     dat <- data.frame(y,X)
     colnames(dat) <-c('y',paste("X", seq(k), sep = ""))
     tv <- evalFunctionOnParameterDef(.parDef,spfrontier.true.value)
-    
+    #plot(x, y)
+    #xf<-seq(1,10,by=0.01)
+    #yf<-.beta0+.beta1*log(xf)+.beta2*log(xf)^2
+    #lines(xf, yf,col="red")
     if (!is.null(.control$replaceWyWv) && .control$replaceWyWv) W_y <- W_v
     if (!is.null(.control$replaceWyWu) && .control$replaceWyWu) W_y <- W_u
     if (!is.null(.control$replaceWvWu) && .control$replaceWvWu) W_v <- W_u
@@ -94,7 +101,7 @@ spfrontier.dgp <- function(){
     if (!is.null(.control$ignoreWv) && .control$ignoreWv) W_v <- NULL
     if (!is.null(.control$ignoreWu) && .control$ignoreWu) W_u <- NULL
     result <- list(formula=formula, data=dat,W_y=W_y,W_v=W_v,W_u=W_u, tv=tv,
-                   loggingLevel=.loggingLevel,inefficiency=.inefficiency)
+                   loggingLevel=.loggingLevel,inefficiency=.inefficiency,control=.control)
     return(result)
 }
 
@@ -106,10 +113,23 @@ spfrontier.estimator <- function(d){
     run <- run + 1
     assign(nam, run, envir=.spfrontierEnv)
     
-    message(paste("Start[n =",n,", run =",run,"]------------------------->"))
+    message(paste("Start [pid=",Sys.getpid()," n =",n,", run =",run,"]------------------------->",rnorm(1)))
+    initialValues <- NULL
+    if (!is.null(d$control) && d$control$true.initial){
+        message("Trying to use true values as initial")
+        logl<-logLikelihood(formula=d$formula, data=d$data,
+                      W_y = d$W_y, W_v = d$W_v,W_u = d$W_u,
+                      inefficiency = d$inefficiency,
+                      values=d$tv)
+        message("Log-likelihood = ", logl)
+        message("Using true values as initial:", (logl>Infin))
+        if(logl>Infin){
+            initialValues <- d$tv
+        }
+    }
     modelEstimates <- spfrontier(d$formula,d$data,W_y=d$W_y,W_v=d$W_v,W_u=d$W_u,
                                  logging = d$loggingLevel,inefficiency=d$inefficiency,onlyCoef=T,
-                                 control=list())
+                                 control=list(),initialValues=initialValues)
     if (status(modelEstimates) > 0){ 
         fake = rep(1000,length(d$tv))
         names(fake) <- names(d$tv)
@@ -119,8 +139,9 @@ spfrontier.estimator <- function(d){
         out <- c(coef$beta,coef$rhoY, coef$sigmaV, coef$sigmaU, coef$rhoV, coef$rhoU, coef$mu)
         
     }
-    message("<-------------------------End")
-    Sys.sleep(0.1)
+    message(paste("<-------------------------End pid=",Sys.getpid()))
+    #Sys.sleep(0.1)
+    flush.console()
     return(out)
 }
 
@@ -154,8 +175,6 @@ spfrontier.true.value <- function(){
     if (exists("beta2")) .beta2<-get("beta2")
     .sigmaU <- NULL
     if (exists("sigmaU")) .sigmaU<-get("sigmaU")
-    .sigmaX <- NULL
-    if (exists("sigmaX")) .sigmaX<-get("sigmaX")
     .sigmaV <- NULL
     if (exists("sigmaV")) .sigmaV<-get("sigmaV")
     .parDef <- NULL
@@ -212,10 +231,7 @@ spfrontier.true.value <- function(){
 #' 
 #' 
 #' @param runs a number of simulated samples 
-#' @param params a set with parameters to be used in simulation.
-#'     
-#' @param autoSave save intermediate results to files. See \code{\link{ezsim}} for details.
-#' @param seed a state for random number generation in R. If NULL (default), the initial state is random. See \code{\link{set.seed}} for details.
+#' @param params a set with parameters to be used in simulation.   
 #' @param inefficiency sets the distribution for inefficiency error component. Possible values are 'half-normal' (for half-normal distribution) and 'truncated' (for truncated normal distribution). 
 #' By default set to 'half-normal'. See references for explanations
 #' @param logging an optional level of logging. Possible values are 'quiet','warn','info','debug'. 
@@ -224,7 +240,9 @@ spfrontier.true.value <- function(){
 #' ignoreWy (TRUE/FALSE) - the spatial contiguity matrix for a dependent variable is not provided to  \code{\link{spfrontier}} estimator (but used in DGP) 
 #' ignoreWv (TRUE/FALSE) - the spatial contiguity matrix for a symmetric error term is not provided to  \code{\link{spfrontier}} estimator (but used in DGP) 
 #' ignoreWu (TRUE/FALSE) - the spatial contiguity matrix for a inefficiency error term is not provided to  \code{\link{spfrontier}} estimator (but used in DGP) 
-#' 
+#' parallel (TRUE/FALSE) - whether to use parallel computer
+#' seed  - a state for random number generation in R. If NULL (default), the initial state is random. See \code{\link{set.seed}} for details.
+#' auto_save  - saves intermediate results to files. See \code{\link{ezsim}} for details.
 #' 
 #' @keywords spatial stochastic frontier, simulation
 #' @export
@@ -242,34 +260,57 @@ spfrontier.true.value <- function(){
 #'                  sigmaU=0.75)
 #' res000 <- ezsimspfrontier(2, 
 #'      params = params000,  
-#'      seed = 999, 
 #'      inefficiency = "half-normal",
-#'      logging = "info")
+#'      logging = "info",
+#'      control=list(seed=999, parallel=F))
 #' summary(res000)
 
-ezsimspfrontier <- function(runs, 
-                            autoSave = 0, 
-                            params = list(n=c(50,100), sigmaX=10, beta0=1, beta1=-2, beta2=3, sigmaV=0.2, sigmaU=0.75),
-                            seed = NULL,
+ezsimspfrontier <- function(runs,
+                            params,
                             inefficiency = "half-normal",
                             logging = "info",
                             control = list()){
+    start <- Sys.time()
+    con <- list(auto_save=0,seed = NULL,ignoreWy=F,ignoreWv=F,ignoreWu=F, cores = detectCores()-1, outfile="spfrontier_simulations.log",true.initial=F)
+    nmsC <- names(con)
+    con[(namc <- names(control))] <- control
+    if (length(noNms <- namc[!namc %in% nmsC])) 
+        warning("unknown names in control: ", paste(noNms, collapse = ", "))
+    
     rm(list = ls(envir=.spfrontierEnv), envir=.spfrontierEnv)
-    if (!is.null(seed)) set.seed(seed)
-    parDef <- createParDef(selection = params, banker = list(loggingLevel=logging,inefficiency=inefficiency,control=control,parDef=createParDef(selection = params, banker=list(control=control))))
-
+    
+    parDef <- createParDef(selection = params, banker = list(loggingLevel=logging,inefficiency=inefficiency,control=con,parDef=createParDef(selection = params, banker=list(control=con))))
+    if (!is.null(con$seed)) {
+        message("Predefined random seed: ", con$seed)
+        set.seed(con$seed)
+    }
+    cl <- NULL
+    if (con$cores>1){
+        message("Parallel computing is in action, number of workers: ",con$cores)
+        cl <- makeCluster(con$cores, outfile=con$outfile)
+        clusterApply(cl, 1:con$cores, function(x) {
+            set.seed(con$seed+x)
+        })
+    }
     ezsim_spfrontier<-ezsim(
         m             = runs,
         run           = TRUE,
+        run_test      = FALSE,
         parameter_def = parDef,
         display_name = c(Intercept='beta[0]',X1='beta[1]',X2='beta[2]',beta0='beta[0]',beta1='beta[1]',beta2='beta[2]',sigmaV='sigma[v]',sigmaU='sigma[u]',sigmaX='sigma[X]',rhoV='rho[v]',rhoU='rho[u]',rhoY='rho[Y]',mu='mu'),
         dgp           = spfrontier.dgp,
         estimator     = spfrontier.estimator,
         true_value    = spfrontier.true.value,
-        auto_save   = autoSave
+        auto_save   = con$auto_save,
+        use_core = con$cores,
+        use_seed = con$seed,
+        cluster = cl
     )
-    
+    if(!is.null(cl)){
+        stopCluster(cl)
+    }
     ezsim_spfrontier <- clearFakes(ezsim_spfrontier)
+    message("Executed in ", (Sys.time()-start))
     return(ezsim_spfrontier)
 }
 

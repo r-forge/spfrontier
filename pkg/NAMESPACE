@@ -8,6 +8,7 @@ importFrom("mvtnorm", dmvnorm, pmvnorm, rmvnorm)
 importFrom("moments", skewness)
 importFrom("ezsim", ezsim, createParDef,createSimulationTable)
 importFrom("Matrix", nearPD)
+importFrom("parallel", detectCores, clusterApply, makeCluster, stopCluster)
 
 #
 # Exports

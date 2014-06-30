@@ -5,23 +5,14 @@
 \usage{
 spfrontier.true.value()
 
-ezsimspfrontier(runs, autoSave = 0, params = list(n = c(50, 100), sigmaX =
-  10, beta0 = 1, beta1 = -2, beta2 = 3, sigmaV = 0.2, sigmaU = 0.75),
-  seed = NULL, inefficiency = "half-normal", logging = "info",
-  control = list())
+ezsimspfrontier(runs, params, inefficiency = "half-normal",
+  logging = "info", control = list())
 }
 \arguments{
   \item{runs}{a number of simulated samples}
 
   \item{params}{a set with parameters to be used in
   simulation.}
-
-  \item{autoSave}{save intermediate results to files. See
-  \code{\link{ezsim}} for details.}
-
-  \item{seed}{a state for random number generation in R. If
-  NULL (default), the initial state is random. See
-  \code{\link{set.seed}} for details.}
 
   \item{inefficiency}{sets the distribution for
   inefficiency error component. Possible values are
@@ -44,7 +35,13 @@ ezsimspfrontier(runs, autoSave = 0, params = list(n = c(50, 100), sigmaX =
   \code{\link{spfrontier}} estimator (but used in DGP)
   ignoreWu (TRUE/FALSE) - the spatial contiguity matrix for
   a inefficiency error term is not provided to
-  \code{\link{spfrontier}} estimator (but used in DGP)}
+  \code{\link{spfrontier}} estimator (but used in DGP)
+  parallel (TRUE/FALSE) - whether to use parallel computer
+  seed - a state for random number generation in R. If NULL
+  (default), the initial state is random. See
+  \code{\link{set.seed}} for details. auto_save - saves
+  intermediate results to files. See \code{\link{ezsim}}
+  for details.}
 }
 \description{
 \code{spfrontier.true.value} returns true parameter values
@@ -72,9 +69,9 @@ params000 <- list(n=c(50, 100),
                  sigmaU=0.75)
 res000 <- ezsimspfrontier(2,
      params = params000,
-     seed = 999,
      inefficiency = "half-normal",
-     logging = "info")
+     logging = "info",
+     control=list(seed=999, parallel=F))
 summary(res000)
 }
 \seealso{

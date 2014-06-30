@@ -65,8 +65,9 @@ spfrontier <- function(formula, data,
                        control=NULL,
                        onlyCoef = F){
     #Validation of model parameters
+    start <- Sys.time()
     logging <- match.arg(logging)
-    con <- list(grid.beta0 = 1, grid.sigmaV = 1, grid.sigmaU = 1, grid.rhoY = 1, grid.rhoU = 10, grid.rhoV = 10, grid.mu = 1,
+    con <- list(grid.beta0 = 1, grid.sigmaV = 1, grid.sigmaU = 1, grid.rhoY = 1, grid.rhoU = 7, grid.rhoV = 7, grid.mu = 1,
                 optim.control = list())
     namc <- names(control)
     con[namc] <- control
@@ -200,7 +201,7 @@ spfrontier <- function(formula, data,
         })
     }
     }
-    logging("Done!")
+    logging(paste("Done! Elapsed time: ",Sys.time()-start))
     finalizeEnvir()
     
     return(estimates)
@@ -293,14 +294,14 @@ gridSearch <- function(params){
     if (!is.null(params$rhoY)){
         gridVal$rho = params$rhoY
     }
-    gridVal$sigmaV = c(params$sigmaV,seq(params$sigmaV-0.5*params$sigmaV, params$sigmaV+0.5*params$sigmaV, length.out = con$grid.sigmaV))
+    gridVal$sigmaV = c(params$sigmaV,seq(params$sigmaV-0.5*params$sigmaV, params$sigmaV+params$sigmaV, length.out = con$grid.sigmaV))
     #gridVal$sigmaU = params$sigmaU
-    gridVal$sigmaU = c(params$sigmaU,seq(params$sigmaU-0.5*params$sigmaU, params$sigmaU+0.5*params$sigmaU, length.out = con$grid.sigmaU))
+    gridVal$sigmaU = c(params$sigmaU,seq(params$sigmaU-0.5*params$sigmaU, params$sigmaU+params$sigmaU, length.out = con$grid.sigmaU))
     if (!is.null(params$rhoV)){
-        gridVal$rhoV = seq(-0.99, 0.99, length.out = con$grid.rhoV)
+        gridVal$rhoV = seq(-0.3, 0.3, length.out = con$grid.rhoV)
     }
     if (!is.null(params$rhoU)){
-        gridVal$rhoU = seq(-0.99, 0.99, length.out = con$grid.rhoU)
+        gridVal$rhoU = seq(-0.3, 0.3, length.out = con$grid.rhoU)
     }
     if (!is.null(params$mu)){
         gridVal$mu = seq(params$mu-3*params$sigmaV,params$mu + 3*params$sigmaV,length.out = con$grid.mu)

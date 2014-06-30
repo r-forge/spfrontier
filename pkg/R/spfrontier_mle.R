@@ -1,6 +1,5 @@
 Infin <- -1e16
 funcLogL <- function(parameters, quiet = F){
-    
     y <- envirGet("y")
     X <- envirGet("X")
     k <- ncol(X)
@@ -66,18 +65,15 @@ funcLogL <- function(parameters, quiet = F){
             vMu = rep(mu, n)
             r <- 0
             if (isSpV || isSpU){
-                v <- pmvnorm(lower=rep(-Inf, n),upper = 0, mean=-vMu, sigma=mOmega)
-                if (v<1e-200){
-                    stop("Log-likelihood function value can not be calculated due to precision limits")
+                f1 <- pmvnorm(lower=rep(-Inf, n),upper = 0, mean=-vMu, sigma=mOmega)
+                #It seems that precision makes a deal here
+                if (f1<1e-50){
+                    stop()
                 }
-                r <- -log(v)
-                #logging("1:",r)
+                r <- -log(f1)
                 r <- r + dmvnorm(x=as.vector(e),mean=vMu, sigma=mC,log=TRUE)
-                
-                #logging("2:",r)
-                r <- r + log(pmvnorm(lower=rep(-Inf, n),upper = as.vector(mOmega%*%imC%*%(e-vMu)), mean=-vMu, sigma=mB))
-                
-                #logging("3:",r)
+                f2 <- pmvnorm(lower=rep(-Inf, n),upper = as.vector(-mOmega%*%imC%*%(e+vMu)), mean=-vMu, sigma=mB)
+                r <- r + log(f2)
             }else{
                 r <- r - n*log(2*pi)/2
                 r <- r - n*log(pnorm(mu/sigmaU))
@@ -94,7 +90,7 @@ funcLogL <- function(parameters, quiet = F){
     }else{
         if(!quiet) logging("Parameters are out of space")
     }
-    if(!quiet) logging(paste("funcLogL =",-ret,"\n"))
+    if(!quiet) logging(paste("funcLogL =",ret,"\n"))
     if (ret == -Inf || is.nan(ret)) ret<- Infin # For fake finite differences
     return(-ret)
 }
