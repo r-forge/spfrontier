@@ -1,8 +1,4 @@
 spfrontier.dgp <- function(){
-    require(mvtnorm)
-    require(spfrontier)
-    require(moments)
-    require(tmvtnorm)
     cat("")
     .mu <- NULL
     if (exists("mu")) .mu<-get("mu")
@@ -89,7 +85,7 @@ spfrontier.dgp <- function(){
     dat <- data.frame(y,X)
     colnames(dat) <-c('y',paste("X", seq(k), sep = ""))
     tv <- evalFunctionOnParameterDef(.parDef,spfrontier.true.value)
-    #plot(x, y)
+    #plot(x, y, main="D (spatial u)")
     #xf<-seq(1,10,by=0.01)
     #yf<-.beta0+.beta1*log(xf)+.beta2*log(xf)^2
     #lines(xf, yf,col="red")
@@ -251,18 +247,16 @@ spfrontier.true.value <- function(){
 #' @rdname simulation
 #' 
 #' @examples
-#' params000 <- list(n=c(50, 100),
-#'                  sigmaX=10, 
-#'                  beta0=1,
-#'                  beta1=-2,
-#'                  beta2=3, 
-#'                  sigmaV=0.2, 
-#'                  sigmaU=0.75)
-#' res000 <- ezsimspfrontier(2, 
-#'      params = params000,  
-#'      inefficiency = "half-normal",
-#'      logging = "info",
-#'      control=list(seed=999, parallel=F))
+#' params000 <- list(n=c(50, 100),beta0=5,
+#'                  beta1=10,
+#'                  beta2=1,
+#'                  sigmaV=0.5, 
+#'                  sigmaU=2.5)
+#' ctrl <- list(seed=999, cores=1)
+#' res000 <- ezsimspfrontier(2, params = params000,  
+#'                  inefficiency = "half-normal",
+#'                  logging = "info", 
+#'                  control=ctrl)
 #' summary(res000)
 
 ezsimspfrontier <- function(runs,
@@ -290,6 +284,10 @@ ezsimspfrontier <- function(runs,
         cl <- makeCluster(con$cores, outfile=con$outfile)
         clusterApply(cl, 1:con$cores, function(x) {
             set.seed(con$seed+x)
+            require(mvtnorm)
+            require(spfrontier)
+            require(moments)
+            require(tmvtnorm)
         })
     }
     ezsim_spfrontier<-ezsim(

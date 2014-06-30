@@ -60,18 +60,16 @@ generated on the base of provided parameters. The resulting
 estimates can be analysed for biasedness, efficiency, etc.
 }
 \examples{
-params000 <- list(n=c(50, 100),
-                 sigmaX=10,
-                 beta0=1,
-                 beta1=-2,
-                 beta2=3,
-                 sigmaV=0.2,
-                 sigmaU=0.75)
-res000 <- ezsimspfrontier(2,
-     params = params000,
-     inefficiency = "half-normal",
-     logging = "info",
-     control=list(seed=999, parallel=F))
+params000 <- list(n=c(50, 100),beta0=5,
+                 beta1=10,
+                 beta2=1,
+                 sigmaV=0.5,
+                 sigmaU=2.5)
+ctrl <- list(seed=999, cores=1)
+res000 <- ezsimspfrontier(2, params = params000,
+                 inefficiency = "half-normal",
+                 logging = "info",
+                 control=ctrl)
 summary(res000)
 }
 \seealso{

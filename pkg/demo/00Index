@@ -1,3 +1,4 @@
 simulation  R code for spfrontier simulation tests
+test_sim    R code for spfrontier simulation tests
 airports    R example for European airports data
 frontier_comparison    Comparison of frontier (Coelli's Frontier 4.1) and spfrontier estimators
