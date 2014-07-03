@@ -46,7 +46,7 @@ spfrontier.dgp <- function(){
     W_v <- NULL
     SpW2 <- diag(.n)
     if (!is.null(.rhoV)){
-        W_v <- rowStdrt(genW(.n,type="rook"))
+        W_v <- rowStdrt(genW(.n,type="queen"))
         SpW2 <- solve(diag(.n)-.rhoV*W_v)
     }
     v <-  SpW2%*%rmvnorm(1,mean = rep(0, .n),sigma = .sigmaV^2*diag(.n))[1,]
@@ -96,7 +96,7 @@ spfrontier.dgp <- function(){
     if (!is.null(.control$ignoreWy) && .control$ignoreWy) W_y <- NULL
     if (!is.null(.control$ignoreWv) && .control$ignoreWv) W_v <- NULL
     if (!is.null(.control$ignoreWu) && .control$ignoreWu) W_u <- NULL
-    result <- list(formula=formula, data=dat,W_y=W_y,W_v=W_v,W_u=W_u, tv=tv,
+    result <- list(formula=formula, data=dat,W_y=W_y,W_v=W_v,W_u=W_u, tv=tv,y=y, x=x,
                    loggingLevel=.loggingLevel,inefficiency=.inefficiency,control=.control)
     return(result)
 }
@@ -111,13 +111,12 @@ spfrontier.estimator <- function(d){
     
     message(paste("Start [pid=",Sys.getpid()," n =",n,", run =",run,"]------------------------->",rnorm(1)))
     initialValues <- NULL
+    logl<-logLikelihood(formula=d$formula, data=d$data,
+                        W_y = d$W_y, W_v = d$W_v,W_u = d$W_u,
+                        inefficiency = d$inefficiency,
+                        values=d$tv)
+    message("Log-likelihood (true DGP) (pid=",Sys.getpid(),") = ", logl)
     if (!is.null(d$control) && d$control$true.initial){
-        message("Trying to use true values as initial")
-        logl<-logLikelihood(formula=d$formula, data=d$data,
-                      W_y = d$W_y, W_v = d$W_v,W_u = d$W_u,
-                      inefficiency = d$inefficiency,
-                      values=d$tv)
-        message("Log-likelihood = ", logl)
         message("Using true values as initial:", (logl>Infin))
         if(logl>Infin){
             initialValues <- d$tv
@@ -284,10 +283,8 @@ ezsimspfrontier <- function(runs,
         cl <- makeCluster(con$cores, outfile=con$outfile)
         clusterApply(cl, 1:con$cores, function(x) {
             set.seed(con$seed+x)
-            require(mvtnorm)
+            message("Predefined seed: ", con$seed+x)
             require(spfrontier)
-            require(moments)
-            require(tmvtnorm)
         })
     }
     ezsim_spfrontier<-ezsim(
@@ -301,7 +298,6 @@ ezsimspfrontier <- function(runs,
         true_value    = spfrontier.true.value,
         auto_save   = con$auto_save,
         use_core = con$cores,
-        use_seed = con$seed,
         cluster = cl
     )
     if(!is.null(cl)){

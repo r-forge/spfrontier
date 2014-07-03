@@ -45,19 +45,16 @@ funcLogL <- function(parameters, quiet = F){
             sigmaV <- 1/(p$nu*sqrt(1+p$lambda^2))
             sigmaU <- p$lambda * sigmaV
             
-            mSigma = sigmaV^2*SpV%*%t(SpV)
-            mOmega = sigmaU^2*SpU%*%t(SpU)
-            mC = mSigma + mOmega
-            imC <- solve(mC)
-            mB <- mOmega%*%imC%*%mSigma 
-            
+            mSigmaV = sigmaV^2*SpV%*%t(SpV)
+            mSigmaU = sigmaU^2*SpU%*%t(SpU)
+            mSigma = mSigmaV + mSigmaU
+            imSigma <- solve(mSigma)
+            mDelta <- mSigmaU%*%imSigma%*%mSigmaV 
+            mGamma <- -mSigmaU%*%imSigma
+            rownames(mDelta) <- colnames(mDelta)
             #Livehack for calculation precision
-            rownames(mB) <- colnames(mB)
-            mB <- as.matrix(nearPD(mB)$mat)
-            
-            mA <- mB %*% solve(mSigma)
-            mD <- -mB %*% solve(mOmega)
-            colnames(mB) <-rownames(mB)
+            #mDelta <- as.matrix(nearPD(mDelta)$mat)
+            #colnames(mDelta) <-rownames(mDelta)
             mu <- 0
             if(isTN){
                 mu <- p$mu
@@ -65,14 +62,13 @@ funcLogL <- function(parameters, quiet = F){
             vMu = rep(mu, n)
             r <- 0
             if (isSpV || isSpU){
-                f1 <- pmvnorm(lower=rep(-Inf, n),upper = 0, mean=-vMu, sigma=mOmega)
-                #It seems that precision makes a deal here
-                if (f1<1e-50){
+                f1 <- pmvnorm(lower=rep(-Inf, n),upper = 0, mean=-vMu, sigma=mSigmaU)
+                r <- -log(f1)
+                if (r == Inf){
                     stop()
                 }
-                r <- -log(f1)
-                r <- r + dmvnorm(x=as.vector(e),mean=vMu, sigma=mC,log=TRUE)
-                f2 <- pmvnorm(lower=rep(-Inf, n),upper = as.vector(-mOmega%*%imC%*%(e+vMu)), mean=-vMu, sigma=mB)
+                r <- r + dmvnorm(x=as.vector(e),mean=-vMu, sigma=mSigma,log=TRUE)
+                f2 <- pmvnorm(lower=rep(-Inf, n),upper = as.vector(mGamma%*%(e+vMu)), mean=-vMu, sigma=mDelta)
                 r <- r + log(f2)
             }else{
                 r <- r - n*log(2*pi)/2

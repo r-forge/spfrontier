@@ -57,3 +57,20 @@ res010 <- ezsimspfrontier(100, params = params010, inefficiency = "half-normal",
 res001 <- ezsimspfrontier(100, params = params001, inefficiency = "half-normal",logging = "info",control=ctrl)
 res101 <- ezsimspfrontier(100, params = params101, inefficiency = "half-normal",logging = "info",control=ctrl)
 res111 <- ezsimspfrontier(100, params = params111, inefficiency = "half-normal",logging = "info",control=ctrl)
+
+
+
+ctrl <- list(true.initial=TRUE, seed=0, cores=detectCores())
+params001$n <- c(100)
+res001.100 <- ezsimspfrontier(100, params = params001, inefficiency = "half-normal",logging = "info",control=ctrl)
+save(res001.100, file="res001.100.rData")
+
+params001$n <- c(200)
+res001.200 <- ezsimspfrontier(100, params = params001, inefficiency = "half-normal",logging = "info",control=ctrl)
+save(res001.200, file="res001.200.rData")
+
+params001$n <- c(300)
+res001.300 <- ezsimspfrontier(100, params = params001, inefficiency = "half-normal",logging = "info",control=ctrl)
+save(res001.300, file="res001.300.rData")
+
+

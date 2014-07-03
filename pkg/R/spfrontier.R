@@ -294,9 +294,9 @@ gridSearch <- function(params){
     if (!is.null(params$rhoY)){
         gridVal$rho = params$rhoY
     }
-    gridVal$sigmaV = c(params$sigmaV,seq(params$sigmaV-0.5*params$sigmaV, params$sigmaV+params$sigmaV, length.out = con$grid.sigmaV))
+    gridVal$sigmaV = c(params$sigmaV,seq(0.5*params$sigmaV, 3*params$sigmaV, length.out = con$grid.sigmaV))
     #gridVal$sigmaU = params$sigmaU
-    gridVal$sigmaU = c(params$sigmaU,seq(params$sigmaU-0.5*params$sigmaU, params$sigmaU+params$sigmaU, length.out = con$grid.sigmaU))
+    gridVal$sigmaU = c(params$sigmaU,seq(0.5*params$sigmaU, 3*params$sigmaU, length.out = con$grid.sigmaU))
     if (!is.null(params$rhoV)){
         gridVal$rhoV = seq(-0.3, 0.3, length.out = con$grid.rhoV)
     }
