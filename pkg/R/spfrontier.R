@@ -71,7 +71,7 @@ spfrontier <- function(formula, data,
     logging <- match.arg(logging)
     if (is.null(initialValues)) initialValues<-"errorsarlm"
     con <- list(grid.beta0 = 1, grid.sigmaV = 1, grid.sigmaU = 1, grid.rhoY = 1, grid.rhoU = 7, grid.rhoV = 7, grid.mu = 1,hessian="numeric",
-                optim.control = list(maxit=1000,reltol=1e-5))
+                optim.control = list(maxit=1000,reltol=1e-3))
     namc <- names(control)
     con[namc] <- control
     noNms <- namc[!namc %in% names(con)]
