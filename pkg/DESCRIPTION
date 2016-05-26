@@ -1,7 +1,7 @@
 Package: spfrontier
 Type: Package
 Title: Spatial Stochastic Frontier Models
-Version: 0.2.2
+Version: 0.2.3
 Date: 2016-05-26
 Author: Dmitry Pavlyuk <Dmitry.V.Pavlyuk@gmail.com>
 Maintainer: Dmitry Pavlyuk <Dmitry.V.Pavlyuk@gmail.com>
@@ -9,9 +9,8 @@ Description: A set of tools for estimation of various spatial specifications of
     stochastic frontier models.
 License: GPL (>= 2)
 Depends:
-    R (>= 3.0),moments,ezsim,tmvtnorm,mvtnorm,optimx,numDeriv
+    R (>= 3.0),moments,tmvtnorm,mvtnorm,spdep,ezsim
 Imports:
-    methods,
-    parallel,spdep
+    methods,parallel,optimx,numDeriv
 ZipData: no
 RoxygenNote: 5.0.1
