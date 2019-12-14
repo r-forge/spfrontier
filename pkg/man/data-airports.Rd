@@ -54,4 +54,3 @@
 The \code{spfrontier} package includes the dataset \code{airports}, 
 containing information about European airports infrastructure and traffic statistics in 2011.
 }
-
