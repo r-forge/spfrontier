@@ -246,7 +246,6 @@ spfrontier.true.value <- function(){
 #' seed  - a state for random number generation in R. If NULL (default), the initial state is random. See \code{\link{set.seed}} for details.
 #' auto_save  - saves intermediate results to files. See \code{\link{ezsim}} for details.
 #' 
-#' @keywords spatial stochastic frontier, simulation
 #' @export
 #' @seealso 
 #' \code{\link{ezsim}}
