@@ -61,7 +61,3 @@ summary(res000)
 \seealso{
 \code{\link{ezsim}}
 }
-\keyword{frontier,}
-\keyword{simulation}
-\keyword{spatial}
-\keyword{stochastic}
