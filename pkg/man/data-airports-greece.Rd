@@ -4,7 +4,8 @@
 \name{airports.greece}
 \alias{airports.greece}
 \title{Greece airports statistical data}
-\format{A dataframe with 39 observations on the following 24 variables.
+\format{
+A dataframe with 39 observations on the following 24 variables.
 
 \describe{
 
@@ -33,7 +34,8 @@
 \item{WLU}{A total volume of work load units (WLU) served by an airport}
 \item{NearestCity}{A road network distance between an airport and its nearest city }
 
-}}
+}
+}
 \source{
 \describe{
 \item{}{"Airport efficiency and public investment in Greece" (2010) 

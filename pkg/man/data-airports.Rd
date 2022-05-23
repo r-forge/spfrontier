@@ -4,7 +4,8 @@
 \name{airports}
 \alias{airports}
 \title{European airports statistical data}
-\format{An unbalanced panel of 395 Euripean airports in 2008-2012 (1763  observations) on the following 31 variables.
+\format{
+An unbalanced panel of 395 Euripean airports in 2008-2012 (1763  observations) on the following 31 variables.
 
 \describe{
 
@@ -40,7 +41,8 @@
 \item{RoutesArrival}{A number of arrival routes, served by an airport}
 \item{Routes}{(RoutesDeparture + RoutesArrival)/2}
 
-}}
+}
+}
 \source{
 \describe{
 \item{}{Eurostat (2013). European Statistics Database, Statistical Office of the European Communities (Eurostat)}

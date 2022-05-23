@@ -4,7 +4,8 @@
 \name{RTEpaper}
 \alias{RTEpaper}
 \title{European airports statistical data (used for the RTE paper)}
-\format{A dataframe with 39 observations on the following 24 variables.
+\format{
+A dataframe with 39 observations on the following 24 variables.
 
 \describe{
 
@@ -35,7 +36,8 @@
 \item{RunwayLength}{Total length of the airport's runways}
 
 
-}}
+}
+}
 \source{
 \describe{
 \item{}{#' Pavlyuk, D., 2016. Implication of spatial heterogeneity for airports’ efficiency estimation. 

@@ -1,6 +1,7 @@
 rm(list=ls())
 
 library(spdep)
+library(spatialreg)
 library(pastecs)
 library(car)
 library(maptools)
