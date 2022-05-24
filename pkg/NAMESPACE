@@ -2,6 +2,7 @@
 # Imports
 #
 import(methods)
+import(gdata)
 importFrom("stats", optim,coefficients,coef,fitted, residuals,pnorm,dnorm,rnorm,quantile,lm,var,dist,model.frame,model.response,runif,as.formula,density,update)
 importFrom("utils", flush.console,head,tail,data)
 importFrom("graphics", plot)

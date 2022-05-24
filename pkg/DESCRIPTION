@@ -9,7 +9,7 @@ Description: A set of tools for estimation of various spatial specifications of
     stochastic frontier models.
 License: GPL (>= 2)
 Depends:
-    R (>= 3.6),moments,tmvtnorm,mvtnorm,spdep,ezsim,spatialreg
+    R (>= 3.6),moments,tmvtnorm,mvtnorm,spdep,ezsim,spatialreg,gdata
 Imports:
     methods,parallel,optimx,numDeriv
 ZipData: no
