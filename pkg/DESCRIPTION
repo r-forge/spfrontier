@@ -9,9 +9,9 @@ Description: A set of tools for estimation of various spatial specifications of
     stochastic frontier models.
 License: GPL (>= 2)
 Depends:
-    R (>= 3.6),moments,tmvtnorm,mvtnorm,spdep,ezsim,spatialreg
+    R (>= 3.6),moments,tmvtnorm,mvtnorm,spdep,ezsim
 Imports:
-    methods,parallel,optimx,numDeriv
+    methods,parallel,optimx,numDeriv,spatialreg
 ZipData: no
 RoxygenNote: 7.2.0
 Encoding: UTF-8
