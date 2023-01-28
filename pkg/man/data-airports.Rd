@@ -45,11 +45,11 @@ An unbalanced panel of 395 Euripean airports in 2008-2012 (1763  observations) o
 }
 \source{
 \describe{
-\item{}{Eurostat (2013). European Statistics Database, Statistical Office of the European Communities (Eurostat)}
-\item{}{Airports' statistical reports(2011)}
-\item{}{Open Flights: Airport, airline and route data http://openflights.org/ (2013-05-31)}
-\item{}{TDC (2012). Informe de fiscalizacion de la imputacion por la entidad "Aeropuertos Espanoles y Navegacion Aerea" (AENA) a cada uno de los aeropuertos de los ingresos, gastos, e inversiones correspondientes a la actividad aeroportuaria, en los ejercicios 2009 y 2010., Tribunal de Cuentas, Spain, Doc 938.}
-\item{}{CIESIN, Columbia University. Gridded Population of the World: Future Estimates (GPWFE). (2005)}
+\item{eurostat_report}{Eurostat (2013). European Statistics Database, Statistical Office of the European Communities (Eurostat)}
+\item{report}{Airports' statistical reports(2011)}
+\item{openflights}{Open Flights: Airport, airline and route data http://openflights.org/ (2013-05-31)}
+\item{aena}{TDC (2012). Informe de fiscalizacion de la imputacion por la entidad "Aeropuertos Espanoles y Navegacion Aerea" (AENA) a cada uno de los aeropuertos de los ingresos, gastos, e inversiones correspondientes a la actividad aeroportuaria, en los ejercicios 2009 y 2010., Tribunal de Cuentas, Spain, Doc 938.}
+\item{ciesin}{CIESIN, Columbia University. Gridded Population of the World: Future Estimates (GPWFE). (2005)}
 }
 }
 \description{

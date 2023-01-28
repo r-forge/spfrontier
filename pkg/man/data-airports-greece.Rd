@@ -38,7 +38,7 @@ A dataframe with 39 observations on the following 24 variables.
 }
 \source{
 \describe{
-\item{}{"Airport efficiency and public investment in Greece" (2010) 
+\item{conference_paper}{"Airport efficiency and public investment in Greece" (2010) 
 In Proceeding of the 2010 International Kuhmo-Nectar Conference on Transport Economics, University of Valencia, Spain.}
 }
 }
