@@ -158,7 +158,7 @@ NULL
 #' }
 #' @source 
 #' \describe{
-#' \item{}{#' Pavlyuk, D., 2016. Implication of spatial heterogeneity for airports’ efficiency estimation. 
+#' \item{RTEpaper}{#' Pavlyuk, D., 2016. Implication of spatial heterogeneity for airports’ efficiency estimation. 
 #' Research in Transportation Economics 56, 15–24. https://doi.org/10.1016/j.retrec.2016.07.002.}
 #' }
 NULL
